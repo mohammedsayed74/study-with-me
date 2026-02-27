@@ -1,5 +1,6 @@
 const User = require(`../models/User`);
-const bcrypt = require(bcrypt);
+const jwt = require(`jsonwebtoken`);
+const bcrypt = require(`bcrypt`);
 
 const loginUser = async (req, res) => {
   try {
@@ -25,9 +26,17 @@ const loginUser = async (req, res) => {
         .json({ message: `error , invalid email or password` });
     }
 
-    // give user JWT
+    const token = jwt.sign(
+      { _id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
 
-    res.status(200).json({ message: `user logged in successfully !` });
+    res.status(200).json({
+      message: `user logged in successfully !`,
+      email: user.email,
+      token: token,
+    });
   } catch (error) {
     res.status(500).json({ error: `something went wrong` });
   }
@@ -35,7 +44,7 @@ const loginUser = async (req, res) => {
 
 const signUpUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: `All fields are required` });
@@ -47,11 +56,36 @@ const signUpUser = async (req, res) => {
       return res.status(400).json({ meesage: `invalid input , try again` });
     }
 
+    const validPassword =
+      password.trim() === password &&
+      !password.includes(` `) &&
+      password.trim().length >= 8;
+
+    const validEmail =
+      email.trim() === email &&
+      email.trim().length >= 15 &&
+      email.includes(`@gmail`) &&
+      email.endsWith(`.com`);
+
+    if (!validEmail || !validPassword) {
+      return res.status(400).json({ meesage: `invalid input , try again` });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, hashedPassword });
+    const user = await User.create({ name, email, hashedPassword, role });
 
-    res.status(201).json({ message: `user signed up successfully !` });
+    const token = jwt.sign(
+      { _id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
+    res.status(200).json({
+      message: `user signed in successfully !`,
+      email: user.email,
+      token: token,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
