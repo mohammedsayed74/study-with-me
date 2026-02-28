@@ -54,7 +54,7 @@ function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/auth/signup", formData);
+      const res = await axios.post("/api/auth/signUp", formData);
       localStorage.setItem("token", res.data.token);
       navigate("/home");
     } catch (err) {
@@ -126,7 +126,7 @@ function Signup() {
 
             <select name="role" onChange={handleChange}>
               <option value="student">Student</option>
-              <option value="doctor">Doctor</option>
+              <option value="doctor">TA</option>
             </select>
 
             <button type="submit" disabled={loading}>
