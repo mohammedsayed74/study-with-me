@@ -9,7 +9,7 @@ app.use(express.json());
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log(`connented to mongoDB`);
+    console.log(`connected to mongoDB`);
   })
   .catch((error) => {
     console.log(`something went wrong`, error);
