@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
-
+import { registerUser } from "../../src/services/authService";
 export default function Register() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -102,7 +102,7 @@ export default function Register() {
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => {
-            setRole((r) => (r === "Select Role" ? "Student" : "Select Role"));
+            setRole((r) => (r === "Select Role" ? "student" : "Select Role"));
           }}
           style={{
             flexDirection: "row",
@@ -137,8 +137,23 @@ export default function Register() {
             alignItems: "center",
             marginTop: SPACING.md,
           }}
-          onPress={() => {
-            router.replace("/auth/login");
+          onPress={async () => {
+            try {
+              const payload = {
+                name: fullName,
+                email,
+                password,
+                role,
+              };
+
+              const result = await registerUser(payload);
+
+              console.log("Register success:", result);
+
+              router.replace("/auth/login");
+            } catch (error) {
+              console.log("Register error:", error.message);
+            }
           }}
         >
           <Text style={TYPO.button}>Register</Text>

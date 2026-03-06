@@ -1,26 +1,42 @@
-import { useEffect, useState } from "react";
-import { Redirect } from "expo-router";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { COLORS, RADIUS, SPACING, TYPO } from "../src/theme/theme";
 
-export default function Index() {
-  const [hasSeen, setHasSeen] = useState(null);
+export default function HomeScreen() {
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("token");
+      router.replace("/auth/login");
+    } catch (error) {
+      console.log("Logout error:", error);
+    }
+  };
 
-  useEffect(() => {
-    const checkOnboarding = async () => {
-      await AsyncStorage.removeItem("hasSeenOnboarding"); //m7tag yt4al b3d el testing
-      const value = await AsyncStorage.getItem("hasSeenOnboarding");
+  return (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: COLORS.white,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: SPACING.lg,
+      }}
+    >
+      <Text style={[TYPO.h2, { marginBottom: SPACING.lg }]}>Home Screen</Text>
 
-      setHasSeen(value === "true");
-    };
-
-    checkOnboarding();
-  }, []);
-
-  if (hasSeen === null) return null;
-
-  return hasSeen ? (
-    <Redirect href="/auth/login" />
-  ) : (
-    <Redirect href="/onboarding" />
+      <TouchableOpacity
+        onPress={handleLogout}
+        style={{
+          backgroundColor: COLORS.navy2,
+          paddingVertical: 14,
+          paddingHorizontal: 28,
+          borderRadius: RADIUS.button,
+        }}
+      >
+        <Text style={TYPO.button}>Log Out</Text>
+      </TouchableOpacity>
+    </View>
   );
 }

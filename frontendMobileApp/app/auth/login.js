@@ -3,6 +3,8 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
+import { loginUser } from "../../src/services/authService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -70,7 +72,7 @@ export default function Login() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry={isPasswordHidden}
-          rightIcon={isPasswordHidden ? "eye-off-outline" : "eye-outline"}
+          rightIcon={isPasswordHidden ? "eye-outline" : "eye-off-outline"}
           onRightIconPress={() => setIsPasswordHidden((v) => !v)}
         />
 
@@ -88,7 +90,21 @@ export default function Login() {
             alignItems: "center",
             marginTop: SPACING.lg,
           }}
-          onPress={() => router.replace("/(tabs)")}
+          onPress={async () => {
+            try {
+              const payload = {
+                email,
+                password,
+              };
+
+              const result = await loginUser(payload);
+              await AsyncStorage.setItem("token", result.token);
+              console.log("Login success:", result);
+              router.replace("/(tabs)/home");
+            } catch (error) {
+              console.log("Login error:", error.message);
+            }
+          }}
         >
           <Text style={TYPO.button}>Log In</Text>
         </TouchableOpacity>
@@ -98,7 +114,7 @@ export default function Login() {
             Don’t have an account?{" "}
             <Text
               style={TYPO.link}
-              onPress={() => router.push("/auth/register")}
+              onPress={() => router.replace("/auth/register")}
             >
               Register
             </Text>
