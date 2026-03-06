@@ -31,15 +31,15 @@ function Login() {
     const newErrors = {};
 
     if (!validateEmail(formData.email))
-    newErrors.email = "Invalid email format";
+      newErrors.email = "Invalid email format";
 
     if (!formData.password)
-    newErrors.password = "Password is required";
+      newErrors.password = "Password is required";
 
     if (Object.keys(newErrors).length > 0) {
-    return setErrors(newErrors);
+      return setErrors(newErrors);
     }
-    
+
     setLoading(true);
 
     try {
@@ -47,61 +47,88 @@ function Login() {
       localStorage.setItem("token", data.token);
       navigate("/home");
     } catch (err) {
-        setErrors({ api: err.response?.data?.message || "Login failed" });
+      setErrors({ api: err.response?.data?.message || "Login failed" });
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-wrapper">
+    <div className="auth-page">
+      { }
+      <div className="auth-blob-1"></div>
+      <div className="auth-blob-2"></div>
 
-        <div className="study-image">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
-            alt="study"
-          />
+      { }
+      <div className="auth-brand">
+        <div className="auth-brand-icon">
+          <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+            school
+          </span>
+        </div>
+        <h2>Study With Me</h2>
+      </div>
+
+      { }
+      <div className="auth-card">
+        <div className="auth-card-header">
+          <h1>Welcome Back</h1>
+          <p>Please enter your details to sign in.</p>
         </div>
 
-        <div className="auth-card">
-          <div className="top-link">
-            <Link to="/signup">Sign Up</Link>
-          </div>
+        {errors.api && <p className="auth-error">{errors.api}</p>}
 
-          <h2>Welcome</h2>
-          {errors.api && <p className="error">{errors.api}</p>}
-
-          <form onSubmit={handleLogin} noValidate>
+        <form className="auth-form" onSubmit={handleLogin} noValidate>
+          { }
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">mail</span>
             <input
               name="email"
               type="email"
-              placeholder="Email"
+              placeholder="Email Address"
               value={formData.email}
               onChange={handleChange}
+              required
             />
-            {errors.email && <p className="error">{errors.email}</p>}
+          </div>
+          {errors.email && <p className="auth-error">{errors.email}</p>}
 
-            <div className="password-box">
-              <input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-              <span className="show-pass" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? "Hide" : "Show"}
-              </span>
-            </div>
-            {errors.password && <p className="error">{errors.password}</p>}
+          { }
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">lock</span>
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <span
+              className="material-symbols-outlined input-icon-right"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "visibility_off" : "visibility"}
+            </span>
+          </div>
+          {errors.password && <p className="auth-error">{errors.password}</p>}
 
+          {/* Login Button */}
+          <button className="auth-submit" type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Log In"}
+            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+              login
+            </span>
+          </button>
+        </form>
+      </div>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Logging..." : "Login"}
-            </button>
-          </form>
-        </div>
+      {/* Footer */}
+      <div className="auth-footer">
+        Don't have an account?{" "}
+        <Link to="/signup" className="footer-link">
+          Sign Up
+        </Link>
       </div>
     </div>
   );

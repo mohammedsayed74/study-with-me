@@ -11,7 +11,7 @@ function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "student"
+    role: "student",
   });
 
   const [errors, setErrors] = useState({});
@@ -30,7 +30,7 @@ function Signup() {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
     setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
   };
@@ -39,15 +39,22 @@ function Signup() {
     e.preventDefault();
     const newErrors = {};
 
-    if (!validateName(formData.name)) newErrors.name = "Name must be at least 3 characters";
+    if (!validateName(formData.name)) {
+      newErrors.name = "Name must be at least 3 characters";
+    }
 
-    if (!validateEmail(formData.email)) newErrors.email = "Invalid email format";
+    if (!validateEmail(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
 
-    if (!validatePassword(formData.password)) newErrors.password =
-      "Password must contain uppercase, lowercase, number & special character";
+    if (!validatePassword(formData.password)) {
+      newErrors.password =
+        "Password must contain uppercase, lowercase, number & special character";
+    }
 
-    if (formData.password !== formData.confirmPassword)
+    if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+    }
 
     if (Object.keys(newErrors).length > 0) return setErrors(newErrors);
 
@@ -65,75 +72,138 @@ function Signup() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-wrapper">
+    <div className="auth-page">
+      {}
+      <div className="auth-blob-1"></div>
+      <div className="auth-blob-2"></div>
 
-        <div className="study-image">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135755.png"
-            alt="study"
-          />
+      {}
+      <div className="auth-brand">
+        <div className="auth-brand-icon">
+          <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
+            school
+          </span>
+        </div>
+        <h2>Study With Me</h2>
+      </div>
+
+      {}
+      <div className="auth-card">
+        <div className="auth-card-header">
+          <h1>Create Account</h1>
+          <p>Join the community to start studying.</p>
         </div>
 
-        <div className="auth-card">
-          <div className="top-link">
-            <Link to="/">Login</Link>
-          </div>
+        {errors.api && <p className="auth-error">{errors.api}</p>}
 
-          <h2>Create Account</h2>
-          {errors.api && <p className="error">{errors.api}</p>}
-
-          <form onSubmit={handleSignup}>
+        <form className="auth-form" onSubmit={handleSignup}>
+          {}
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">person</span>
             <input
               name="name"
-              placeholder="Name"
+              type="text"
+              placeholder="Full Name"
+              value={formData.name}
               onChange={handleChange}
+              required
             />
-            {errors.name && <p className="error">{errors.name}</p>}
+          </div>
+          {errors.name && <p className="auth-error">{errors.name}</p>}
 
+          {}
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">mail</span>
             <input
               name="email"
-              placeholder="Email"
+              type="email"
+              placeholder="Email Address"
+              value={formData.email}
               onChange={handleChange}
+              required
             />
-            {errors.email && <p className="error">{errors.email}</p>}
+          </div>
+          {errors.email && <p className="auth-error">{errors.email}</p>}
 
-            <div className="password-box">
-              <input
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                onChange={handleChange}
-              />
-              <span className="show-pass" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? "Hide" : "Show"}
-              </span>
-            </div>
-            {errors.password && <p className="error">{errors.password}</p>}
+          {}
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">lock</span>
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <span
+              className="material-symbols-outlined input-icon-right"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "visibility_off" : "visibility"}
+            </span>
+          </div>
+          {errors.password && <p className="auth-error">{errors.password}</p>}
 
-            <div className="password-box">
-              <input
-                name="confirmPassword"
-                type={showConfirm ? "text" : "password"}
-                placeholder="Confirm Password"
-                onChange={handleChange}
-              />
-              <span className="show-pass" onClick={() => setShowConfirm(!showConfirm)}>
-                {showConfirm ? "Hide" : "Show"}
-              </span>
-            </div>
-            {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+          {}
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">lock</span>
+            <input
+              name="confirmPassword"
+              type={showConfirm ? "text" : "password"}
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+            <span
+              className="material-symbols-outlined input-icon-right"
+              onClick={() => setShowConfirm(!showConfirm)}
+            >
+              {showConfirm ? "visibility_off" : "visibility"}
+            </span>
+          </div>
+          {errors.confirmPassword && (
+            <p className="auth-error">{errors.confirmPassword}</p>
+          )}
 
-            <select name="role" onChange={handleChange}>
+          {}
+          <div className="auth-input-group">
+            <span className="material-symbols-outlined input-icon">menu_book</span>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              required
+            >
+              <option disabled hidden value="">
+                Select Role
+              </option>
               <option value="student">Student</option>
-              <option value="doctor">TA</option>
+              <option value="teacher">Teacher</option>
             </select>
+            <span className="material-symbols-outlined input-icon-right-inert">
+              expand_more
+            </span>
+          </div>
+          {errors.role && <p className="auth-error">{errors.role}</p>}
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Creating..." : "Register"}
-            </button>
-          </form>
-        </div>
+          {}
+          <button className="auth-submit" type="submit" disabled={loading}>
+            {loading ? "Creating..." : "Register"}
+            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+              person_add
+            </span>
+          </button>
+        </form>
+      </div>
+
+      {}
+      <div className="auth-footer">
+        Already have an account?{" "}
+        <Link to="/" className="footer-link">
+          Log In
+        </Link>
       </div>
     </div>
   );
