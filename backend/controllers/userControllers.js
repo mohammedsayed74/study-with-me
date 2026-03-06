@@ -53,7 +53,7 @@ const signUpUser = async (req, res) => {
     const alreadyExists = await User.findOne({ email });
 
     if (alreadyExists) {
-      return res.status(400).json({ message: `invalid input , try again` });
+      return res.status(400).json({ meesage: `invalid input , try again` });
     }
 
     const validPassword =
@@ -61,11 +61,8 @@ const signUpUser = async (req, res) => {
       !password.includes(` `) &&
       password.trim().length >= 8;
 
-    const validEmail =
-      email.trim() === email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-    if (!validEmail || !validPassword) {
-      return res.status(400).json({ message: `invalid input , try again` });
+    if (!validPassword) {
+      return res.status(400).json({ meesage: `invalid input , try again` });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

@@ -54,7 +54,7 @@ function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/auth/signUp", formData);
+      const res = await axios.post("/api/users/signUp", formData);
       localStorage.setItem("token", res.data.token);
       navigate("/home");
     } catch (err) {

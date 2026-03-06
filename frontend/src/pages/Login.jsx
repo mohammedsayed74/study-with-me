@@ -43,7 +43,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post("/api/auth/login", formData);
+      const { data } = await axios.post("/api/users/login", formData);
       localStorage.setItem("token", data.token);
       navigate("/home");
     } catch (err) {
