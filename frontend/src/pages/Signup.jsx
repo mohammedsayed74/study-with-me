@@ -1,10 +1,16 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./auth.css";
 
 function Signup() {
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    return <Navigate to="/home" replace />;
+  }
 
   const [formData, setFormData] = useState({
     name: "",
@@ -63,7 +69,7 @@ function Signup() {
     try {
       const res = await axios.post("/api/users/signUp", formData);
       localStorage.setItem("token", res.data.token);
-      navigate("/home");
+      navigate("/home", { replace: true });
     } catch (err) {
       setErrors({ api: err.response?.data?.message || "Error signing up" });
     }
@@ -73,11 +79,9 @@ function Signup() {
 
   return (
     <div className="auth-page">
-      {}
       <div className="auth-blob-1"></div>
       <div className="auth-blob-2"></div>
 
-      {}
       <div className="auth-brand">
         <div className="auth-brand-icon">
           <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
@@ -87,7 +91,6 @@ function Signup() {
         <h2>Study With Me</h2>
       </div>
 
-      {}
       <div className="auth-card">
         <div className="auth-card-header">
           <h1>Create Account</h1>
@@ -97,7 +100,6 @@ function Signup() {
         {errors.api && <p className="auth-error">{errors.api}</p>}
 
         <form className="auth-form" onSubmit={handleSignup}>
-          {}
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">person</span>
             <input
@@ -111,7 +113,6 @@ function Signup() {
           </div>
           {errors.name && <p className="auth-error">{errors.name}</p>}
 
-          {}
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">mail</span>
             <input
@@ -125,7 +126,6 @@ function Signup() {
           </div>
           {errors.email && <p className="auth-error">{errors.email}</p>}
 
-          {}
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">lock</span>
             <input
@@ -145,7 +145,6 @@ function Signup() {
           </div>
           {errors.password && <p className="auth-error">{errors.password}</p>}
 
-          {}
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">lock</span>
             <input
@@ -167,7 +166,6 @@ function Signup() {
             <p className="auth-error">{errors.confirmPassword}</p>
           )}
 
-          {}
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">menu_book</span>
             <select
@@ -188,7 +186,6 @@ function Signup() {
           </div>
           {errors.role && <p className="auth-error">{errors.role}</p>}
 
-          {}
           <button className="auth-submit" type="submit" disabled={loading}>
             {loading ? "Creating..." : "Register"}
             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
@@ -198,10 +195,9 @@ function Signup() {
         </form>
       </div>
 
-      {}
       <div className="auth-footer">
         Already have an account?{" "}
-        <Link to="/" className="footer-link">
+        <Link to="/login" className="footer-link">
           Log In
         </Link>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./auth.css";
 
@@ -14,6 +14,12 @@ function Login() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    return <Navigate to="/home" replace />;
+  }
 
   const validateEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -45,7 +51,7 @@ function Login() {
     try {
       const { data } = await axios.post("/api/users/login", formData);
       localStorage.setItem("token", data.token);
-      navigate("/home");
+      navigate("/home", { replace: true });
     } catch (err) {
       setErrors({ api: err.response?.data?.message || "Login failed" });
     }
@@ -55,11 +61,9 @@ function Login() {
 
   return (
     <div className="auth-page">
-      { }
       <div className="auth-blob-1"></div>
       <div className="auth-blob-2"></div>
 
-      { }
       <div className="auth-brand">
         <div className="auth-brand-icon">
           <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
@@ -69,7 +73,6 @@ function Login() {
         <h2>Study With Me</h2>
       </div>
 
-      { }
       <div className="auth-card">
         <div className="auth-card-header">
           <h1>Welcome Back</h1>
@@ -79,7 +82,6 @@ function Login() {
         {errors.api && <p className="auth-error">{errors.api}</p>}
 
         <form className="auth-form" onSubmit={handleLogin} noValidate>
-          { }
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">mail</span>
             <input
@@ -93,7 +95,6 @@ function Login() {
           </div>
           {errors.email && <p className="auth-error">{errors.email}</p>}
 
-          { }
           <div className="auth-input-group">
             <span className="material-symbols-outlined input-icon">lock</span>
             <input
@@ -113,7 +114,6 @@ function Login() {
           </div>
           {errors.password && <p className="auth-error">{errors.password}</p>}
 
-          {/* Login Button */}
           <button className="auth-submit" type="submit" disabled={loading}>
             {loading ? "Logging in..." : "Log In"}
             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
@@ -123,7 +123,6 @@ function Login() {
         </form>
       </div>
 
-      {/* Footer */}
       <div className="auth-footer">
         Don't have an account?{" "}
         <Link to="/signup" className="footer-link">
