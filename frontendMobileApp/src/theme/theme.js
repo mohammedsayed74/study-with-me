@@ -9,6 +9,7 @@ export const COLORS = {
   muted: "rgba(2, 16, 36, 0.65)",
   border: "rgba(2, 16, 36, 0.10)",
   error: "#D32F2F",
+  grey:"grey"
 };
 
 export const RADIUS = {
