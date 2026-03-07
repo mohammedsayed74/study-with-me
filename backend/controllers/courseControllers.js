@@ -5,12 +5,12 @@ const createCourse = async (req, res) => {
   try {
     const { title, courseCode, description } = req.body;
     if (!title || !courseCode || !description)
-      res
+      return res
         .status(400)
         .json({ message: `invalid title or course code , try again` });
     const courseExists = await course.findOne({ courseCode });
     if (courseExists) {
-      res.status(400).json({ message: `course with this code already exists` });
+      return res.status(400).json({ message: `course with this code already exists` });
     }
     const adminId = req.user._id;
     const newCourse = await course.create({
@@ -19,7 +19,7 @@ const createCourse = async (req, res) => {
       description,
       admin: adminId,
     });
-    res
+    return res
       .status(201)
       .json({
         success: true,
@@ -28,9 +28,9 @@ const createCourse = async (req, res) => {
       });
   } catch (error) {
     if (error.code === 11000) {
-      res.status(400).json({ message: `course with this code already exists` });
+      return res.status(400).json({ message: `course with this code already exists` });
     }
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -40,7 +40,7 @@ const getAllCourses = async (req, res) => {
       .find({})
       .sort({ createdAt: -1 })
       .populate(`admin`, `name`);
-    res
+    return res
       .status(200)
       .json({
         success: true,
@@ -49,7 +49,7 @@ const getAllCourses = async (req, res) => {
         data: courses,
       });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -60,9 +60,9 @@ const getCourse = async (req, res) => {
       .findOne({ courseCode })
       .populate(`admin`, `name`);
     if (!Course) {
-      res.status(404).json({ success: false, message: `course not found` });
+      return res.status(404).json({ success: false, message: `course not found` });
     }
-    res
+    return res
       .status(200)
       .json({
         success: true,
@@ -70,7 +70,7 @@ const getCourse = async (req, res) => {
         data: Course,
       });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -83,9 +83,9 @@ const updateCourse = async (req, res) => {
       { title, description },
     );
     if (!updatedCourse) {
-      res.status(404).json({ success: false, message: `course not found` });
+      return res.status(404).json({ success: false, message: `course not found` });
     }
-    res
+    return res
       .status(200)
       .json({
         success: true,
@@ -93,7 +93,7 @@ const updateCourse = async (req, res) => {
         data: updatedCourse,
       });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
@@ -102,9 +102,9 @@ const deleteCourse = async (req, res) => {
     const { courseCode } = req.params;
     const deletedCourse = await course.findOneAndDelete({ courseCode });
     if (!deletedCourse) {
-      res.status(404).json({ success: false, message: `course not found` });
+      return res.status(404).json({ success: false, message: `course not found` });
     }
-    res
+    return res
       .status(200)
       .json({
         success: true,
@@ -112,7 +112,7 @@ const deleteCourse = async (req, res) => {
         data: deletedCourse,
       });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
 };
 
