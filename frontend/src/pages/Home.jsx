@@ -105,9 +105,9 @@ function Home() {
         {courses.map((course) => (
 
           <div
-            key={course._id}
+            key={course.courseCode}
             className="course-card"
-            onClick={() => navigate(`/course/${course._id}`)}
+            onClick={() => navigate(`/course/${course.courseCode}`)}
           >
 
             <h2>{course.title}</h2>
