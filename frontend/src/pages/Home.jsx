@@ -87,7 +87,12 @@ function Home() {
               Add Course
             </button>
           )}
-
+          
+<button className="logout-btn"
+  onClick={() => navigate("/profile")}
+>
+  Profile
+</button>
           <button
             className="logout-btn"
             onClick={logout}
