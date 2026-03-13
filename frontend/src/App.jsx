@@ -4,7 +4,9 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
-import UserProfile from "./pages/userprofile";
+import UserProfile from "./pages/UserProfile";
+import CourseMaterials from "./pages/CourseMaterials";
+import UploadMaterialPage from "./pages/UploadMaterialPage";
 
 
 function ProtectedRoute({ children }) {
@@ -49,16 +51,33 @@ function App() {
           }
         />
 
-<Route
-  path="/profile"
-  element={
-    <ProtectedRoute>
-      <UserProfile />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
 
-        
+        <Route
+          path="/course/:courseCode"
+          element={
+            <ProtectedRoute>
+              <CourseMaterials />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/course/:courseCode/upload"
+          element={
+            <ProtectedRoute>
+              <UploadMaterialPage />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
