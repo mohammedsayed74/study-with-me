@@ -4,6 +4,8 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
+import UserProfile from "./pages/userprofile";
+
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -46,9 +48,22 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+<Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <UserProfile />
+    </ProtectedRoute>
+  }
+/>
+
+        
       </Routes>
     </BrowserRouter>
   );
+
+
 }
 
 export default App;
