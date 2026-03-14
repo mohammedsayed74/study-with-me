@@ -4,6 +4,11 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
+import UserProfile from "./pages/UserProfile";
+import ResetPassword from "./pages/ResetPassword";
+import CourseMaterials from "./pages/CourseMaterials";
+import UploadMaterialPage from "./pages/UploadMaterialPage";
+
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -46,9 +51,48 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            <ProtectedRoute>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/course/:courseCode"
+          element={
+            <ProtectedRoute>
+              <CourseMaterials />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/course/:courseCode/upload"
+          element={
+            <ProtectedRoute>
+              <UploadMaterialPage />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
+
+
 }
 
 export default App;

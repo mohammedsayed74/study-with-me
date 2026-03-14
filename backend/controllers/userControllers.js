@@ -1,4 +1,5 @@
 const User = require(`../models/User`);
+const Material = require(`../models/Material`);
 const jwt = require(`jsonwebtoken`);
 const bcrypt = require(`bcrypt`);
 
@@ -92,4 +93,54 @@ const signUpUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, signUpUser };
+const getUserProfile = async (req, res) => {
+  console.log("Profile route hit for user:", req.user?._id);
+  try {
+    const user = await User.findById(req.user._id).select('-hashedPassword');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const materials = await Material.find({ uploadedBy: req.user._id });
+
+    res.status(200).json({ user, materials });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.hashedPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Incorrect current password' });
+    }
+
+    // Password validation logic
+    if (newPassword.length < 8 || newPassword.includes(' ') || newPassword.trim() !== newPassword) {
+        return res.status(400).json({ message: 'Invalid new password format' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.hashedPassword = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { loginUser, signUpUser, getUserProfile, resetPassword };

@@ -1,34 +1,38 @@
-import React from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
-const courses = [
-  {
-    id: "1",
-    title: "Mathematics",
-    courseCode: "MATH101",
-    description: "Introduction to algebra and basic mathematics."
-  },
-  {
-    id: "2",
-    title: "Physics",
-    courseCode: "PHY101",
-    description: "Basic concepts of mechanics and motion."
-  },
-  {
-    id: "3",
-    title: "Computer Science",
-    courseCode: "CS101",
-    description: "Introduction to programming and algorithms."
-  }
-];
+import { getCourses } from "../../src/services/coursesService";
+import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { jwtDecode } from "jwt-decode";
+
+
 
 export default function CoursesScreen() {
+  const [courses, setCourses] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      const res = await getCourses();
+      //console.log(res.data);
+      setCourses(res);
+      let token = await AsyncStorage.getItem("token");
+      const decodedToken = jwtDecode(token);
+      setIsAdmin(decodedToken.role == "teacher");
+      //console.log(decodedToken.role);
+    };
+
+    fetchCourses();
+  }, []);
 
   const renderCourse = ({ item }) => (
     <View style={styles.card}>
-      
+
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{item.title}</Text>
+        <View style={{width:200}}>
+          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>{item.title}</Text>
+        </View>
 
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{item.courseCode}</Text>
@@ -36,6 +40,22 @@ export default function CoursesScreen() {
       </View>
 
       <Text style={styles.description}>{item.description}</Text>
+
+      {isAdmin && (
+        <View style={styles.actions}>
+
+          <TouchableOpacity style={styles.editBtn}>
+            <Feather name="edit" size={18} color={COLORS.navy2} />
+            <Text style={styles.editText}>Edit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.deleteBtn}>
+            <Feather name="trash-2" size={18} color="red" />
+            <Text style={styles.deleteText}>Delete</Text>
+          </TouchableOpacity>
+
+        </View>
+      )}
 
     </View>
   );
@@ -47,11 +67,17 @@ export default function CoursesScreen() {
 
       <FlatList
         data={courses}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={renderCourse}
         showsVerticalScrollIndicator={false}
       />
-
+      <TouchableOpacity style={styles.fab} 
+      onPress={() => {
+        router.push("/courses/addCourse");
+      }}
+      >
+        <Feather name="plus" size={28} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -64,20 +90,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
 
-  pageTitle: 
-   TYPO.h1
+  pageTitle:
+    TYPO.h1
   ,
 
   card: {
-    backgroundColor: "white",
+    backgroundColor: COLORS.card,
     padding: 18,
     borderRadius: RADIUS.card,
     marginBottom: 16,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
   },
 
   headerRow: {
@@ -86,8 +107,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  title: 
-   TYPO.h2
+  title:
+    TYPO.h2
   ,
 
   badge: {
@@ -108,6 +129,61 @@ const styles = StyleSheet.create({
     color: COLORS.grey,
     fontSize: 14,
     lineHeight: 20,
-  }
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+  },
 
+  editBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: COLORS.white,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: 30,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3
+  },
+
+  deleteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: COLORS.white,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: 30,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3
+  },
+
+  editText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.navy2
+  },
+
+  deleteText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "red"
+  },
+  fab: {
+  position: "absolute",
+  right: 20,
+  bottom: 30,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+  backgroundColor: "#2563eb",
+  justifyContent: "center",
+  alignItems: "center",
+  }
 });

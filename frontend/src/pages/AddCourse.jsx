@@ -43,7 +43,7 @@ function AddCourse() {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             required
-                            placeholder="E.g. Introduction to React"
+                            placeholder="E.g. Software Engineering"
                         />
                     </div>
 
@@ -54,7 +54,7 @@ function AddCourse() {
                             value={courseCode}
                             onChange={(e) => setCourseCode(e.target.value)}
                             required
-                            placeholder="E.g. CS101"
+                            placeholder="E.g. CS303"
                         />
                     </div>
 
