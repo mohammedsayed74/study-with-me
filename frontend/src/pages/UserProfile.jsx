@@ -128,30 +128,49 @@ const UserProfile = () => {
 
             <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2rem", backgroundColor: "#fff" }}>
                 
-                {/* User Info Header (Edit Button Added) */}
+                {/* User Info Header (Buttons Added) */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
                     <div>
                         <h2 style={{ margin: 0, fontSize: "1.4rem", color: "#222", fontWeight: "700" }}>{name || "Your Name"}</h2>
                         <p style={{ margin: "5px 0 0 0", color: "#888", fontSize: "0.95rem" }}>{email}</p>
                     </div>
                     
-                    <button 
-                        onClick={() => setIsEditing(!isEditing)}
-                        style={{
-                            padding: "0.6rem 2rem",
-                            backgroundColor: isEditing ? "#10B981" : "#3B82F6",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "6px",
-                            fontSize: "0.95rem",
-                            fontWeight: "600",
-                            cursor: "pointer",
-                            boxShadow: isEditing ? "0 2px 4px rgba(16, 185, 129, 0.3)" : "0 2px 4px rgba(59, 130, 246, 0.3)",
-                            transition: "all 0.2s"
-                        }}
-                    >
-                        {isEditing ? "Save" : "Edit"}
-                    </button>
+                    <div style={{ display: "flex", gap: "1rem" }}>
+                        <button 
+                            onClick={() => navigate("/reset-password")}
+                            style={{
+                                padding: "0.6rem 1.5rem",
+                                backgroundColor: "#fff",
+                                color: "#3B82F6",
+                                border: "1px solid #3B82F6",
+                                borderRadius: "6px",
+                                fontSize: "0.95rem",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            Reset Password
+                        </button>
+
+                        <button 
+                            onClick={() => setIsEditing(!isEditing)}
+                            style={{
+                                padding: "0.6rem 2rem",
+                                backgroundColor: isEditing ? "#10B981" : "#3B82F6",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "6px",
+                                fontSize: "0.95rem",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                boxShadow: isEditing ? "0 2px 4px rgba(16, 185, 129, 0.3)" : "0 2px 4px rgba(59, 130, 246, 0.3)",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            {isEditing ? "Save" : "Edit"}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Form Grid */}
