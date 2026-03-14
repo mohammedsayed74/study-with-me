@@ -10,6 +10,7 @@ const UserProfile = () => {
     const [name, setName] = useState("");
     const [nickName, setNickName] = useState("");
     const [gender, setGender] = useState("");
+    const [description, setDescription] = useState("");
     
     // Edit mode
     const [isEditing, setIsEditing] = useState(false);
@@ -45,6 +46,9 @@ const UserProfile = () => {
                 
                 const localGender = localStorage.getItem(`profileGender_${userEmail}`);
                 setGender(localGender || "");
+
+                const localDesc = localStorage.getItem(`profileDesc_${userEmail}`);
+                setDescription(localDesc || "");
 
                 setLoading(false);
             } catch (err) {
@@ -254,6 +258,35 @@ const UserProfile = () => {
                                 expand_more
                             </span>
                         </div>
+                    </div>
+
+                    {/* My Description */}
+                    <div style={{ gridColumn: "1 / -1" }}>
+                        <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>My Description</label>
+                        <textarea 
+                            placeholder="Write a bio or description about yourself..."
+                            value={description}
+                            readOnly={!isEditing}
+                            onChange={(e) => {
+                                setDescription(e.target.value);
+                                handleSave("Desc", e.target.value);
+                            }}
+                            rows={4}
+                            style={{
+                                width: "100%",
+                                padding: "0.9rem 1rem",
+                                borderRadius: "8px",
+                                border: isEditing ? "1px solid #C6DDF0" : "1px solid transparent",
+                                backgroundColor: isEditing ? "#fff" : "#FAFAFA",
+                                color: "#333",
+                                fontSize: "0.95rem",
+                                outline: "none",
+                                boxSizing: "border-box",
+                                resize: "vertical",
+                                fontFamily: "inherit",
+                                transition: "all 0.2s"
+                            }}
+                        />
                     </div>
 
                 </div>
