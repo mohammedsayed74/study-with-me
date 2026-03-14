@@ -56,7 +56,16 @@ export default function CoursesScreen() {
 
       {isAdmin && (
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={(e) => {
+              e.stopPropagation?.();
+              router.push({
+                pathname: "/courses/editCourse",
+                params: { courseCode: item.courseCode },
+              });
+            }}
+          >
             <Feather name="edit" size={18} color={COLORS.navy2} />
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
