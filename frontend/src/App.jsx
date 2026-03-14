@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import AddCourse from "./pages/AddCourse";
 import EditCourse from "./pages/EditCourse";
 import UserProfile from "./pages/UserProfile";
+import ResetPassword from "./pages/ResetPassword";
 import CourseMaterials from "./pages/CourseMaterials";
 import UploadMaterialPage from "./pages/UploadMaterialPage";
 
@@ -56,6 +57,15 @@ function App() {
           element={
             <ProtectedRoute>
               <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            <ProtectedRoute>
+              <ResetPassword />
             </ProtectedRoute>
           }
         />

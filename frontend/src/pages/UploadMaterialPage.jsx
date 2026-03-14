@@ -15,10 +15,8 @@ function UploadMaterialPage() {
 
     const fileInputRef = useRef(null);
 
-    // Extract token
     const token = localStorage.getItem("token");
 
-    // Redirect to login if user lost session
     if (!token) {
         navigate("/login", { replace: true });
         return null;
@@ -27,7 +25,7 @@ function UploadMaterialPage() {
     const handleFileChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
             setFile(e.target.files[0]);
-            setFeedback({ type: "", message: "" }); // Clear past errors
+            setFeedback({ type: "", message: "" });
         }
     };
 
@@ -57,7 +55,6 @@ function UploadMaterialPage() {
                 }
             });
 
-            // Navigate back to materials list once successful
             navigate(`/course/${courseCode}`);
         } catch (err) {
             setFeedback({
