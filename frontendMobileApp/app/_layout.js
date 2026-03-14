@@ -14,6 +14,7 @@ export default function RootLayout() {
         <Stack.Screen name="courses/[courseCode]" />
         <Stack.Screen name="courses/uploadMaterial" />
         <Stack.Screen name="courses/editCourse" />
+        <Stack.Screen name="auth/resetPassword" />
       </Stack>
       <StatusBar style="dark" />
     </>

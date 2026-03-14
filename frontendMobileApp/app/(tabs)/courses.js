@@ -1,33 +1,63 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
-import { getCourses } from "../../src/services/coursesService";
+import { getCourses, deleteCourse } from "../../src/services/coursesService";
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
+
 export default function CoursesScreen() {
   const [courses, setCourses] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  useEffect(() => {
-    const fetchCourses = async () => {
-      const res = await getCourses();
-      //console.log(res.data);
-      setCourses(res);
-      let token = await AsyncStorage.getItem("token");
-      const decodedToken = jwtDecode(token);
-      setIsAdmin(decodedToken.role == "teacher");
-      //console.log(decodedToken.role);
-    };
 
-    fetchCourses();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCourses = async () => {
+        try {
+          const res = await getCourses();
+          setCourses(res);
+          const token = await AsyncStorage.getItem("token");
+          const decodedToken = jwtDecode(token);
+          setIsAdmin(decodedToken.role === "teacher");
+        } catch (err) {
+          console.error("Failed to load courses:", err);
+        }
+      };
+      fetchCourses();
+    }, [])
+  );
+
+  const handleDelete = (courseCode, title) => {
+    Alert.alert(
+      "Delete Course",
+      `Are you sure you want to delete "${title}"?\nThis cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteCourse(courseCode);
+              setCourses((prev) =>
+                prev.filter((c) => c.courseCode !== courseCode)
+              );
+            } catch (err) {
+              Alert.alert("Error", err.message || "Failed to delete course.");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const renderCourse = ({ item }) => (
     <TouchableOpacity
@@ -41,37 +71,40 @@ export default function CoursesScreen() {
       }
     >
       <View style={styles.headerRow}>
-        <View style={{ width: 200 }}>
+        <View style={{ flex: 1, marginRight: 8 }}>
           <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
             {item.title}
           </Text>
         </View>
-
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{item.courseCode}</Text>
         </View>
       </View>
 
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={styles.description} numberOfLines={2}>
+        {item.description}
+      </Text>
 
       {isAdmin && (
         <View style={styles.actions}>
           <TouchableOpacity
             style={styles.editBtn}
-            onPress={(e) => {
-              e.stopPropagation?.();
+            onPress={() =>
               router.push({
                 pathname: "/courses/editCourse",
                 params: { courseCode: item.courseCode },
-              });
-            }}
+              })
+            }
           >
-            <Feather name="edit" size={18} color={COLORS.navy2} />
+            <Feather name="edit" size={16} color={COLORS.navy2} />
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteBtn}>
-            <Feather name="trash-2" size={18} color="red" />
+          <TouchableOpacity
+            style={styles.deleteBtn}
+            onPress={() => handleDelete(item.courseCode, item.title)}
+          >
+            <Feather name="trash-2" size={16} color="red" />
             <Text style={styles.deleteText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -88,13 +121,13 @@ export default function CoursesScreen() {
         keyExtractor={(item) => item._id}
         renderItem={renderCourse}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
+
       {isAdmin && (
         <TouchableOpacity
           style={styles.fab}
-          onPress={() => {
-            router.push("/courses/addCourse");
-          }}
+          onPress={() => router.push("/courses/addCourse")}
         >
           <Feather name="plus" size={28} color="white" />
         </TouchableOpacity>
@@ -111,6 +144,7 @@ const styles = StyleSheet.create({
   },
 
   pageTitle: TYPO.h1,
+
   card: {
     backgroundColor: COLORS.card,
     padding: 18,
@@ -125,6 +159,7 @@ const styles = StyleSheet.create({
   },
 
   title: TYPO.h2,
+
   badge: {
     backgroundColor: COLORS.blue,
     paddingHorizontal: 10,
@@ -144,6 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -158,7 +194,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 22,
     borderRadius: 30,
-
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -179,16 +214,17 @@ const styles = StyleSheet.create({
   },
 
   editText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: COLORS.navy2,
   },
 
   deleteText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "red",
   },
+
   fab: {
     position: "absolute",
     right: 20,

@@ -79,6 +79,7 @@ export default function Login() {
 
         <TouchableOpacity
           style={{ alignSelf: "flex-end", marginTop: SPACING.xs }}
+          onPress={() => router.push("/auth/resetPassword")}
         >
           <Text style={TYPO.link}>Forgot password?</Text>
         </TouchableOpacity>
