@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
 import { registerUser } from "../../src/services/authService";
+
 export default function Register() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
   const [isConfirmHidden, setIsConfirmHidden] = useState(true);
-
-  const [role, setRole] = useState("Select Role");
+  const [role, setRole] = useState("student");
+  const [loading, setLoading] = useState(false);
 
   return (
     <View
@@ -99,64 +99,103 @@ export default function Register() {
           onRightIconPress={() => setIsConfirmHidden((v) => !v)}
         />
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => {
-            setRole((r) => (r === "Select Role" ? "student" : "Select Role"));
-          }}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            borderWidth: 1,
-            borderColor: COLORS.border,
-            borderRadius: RADIUS.input,
-            paddingHorizontal: SPACING.md,
-            paddingVertical: 12,
-            marginBottom: SPACING.sm,
-          }}
-        >
-          <Ionicons name="people-outline" size={18} color={COLORS.navy2} />
+        <View style={{ marginBottom: SPACING.sm }}>
           <Text
             style={{
-              marginLeft: SPACING.sm,
-              color: role === "Select Role" ? COLORS.muted : COLORS.text,
+              fontSize: 12,
+              fontWeight: "700",
+              color: COLORS.muted,
+              marginBottom: 8,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
             }}
           >
-            {role}
+            I am a…
           </Text>
-          <View style={{ marginLeft: "auto" }}>
-            <Ionicons name="chevron-down" size={18} color={COLORS.muted} />
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            {["student", "teacher"].map((option) => {
+              const isActive = role === option;
+              return (
+                <TouchableOpacity
+                  key={option}
+                  onPress={() => setRole(option)}
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    paddingVertical: 12,
+                    borderRadius: RADIUS.button,
+                    borderWidth: 1.5,
+                    borderColor: isActive ? COLORS.navy2 : COLORS.border,
+                    backgroundColor: isActive ? COLORS.navy2 : COLORS.white,
+                  }}
+                >
+                  <Ionicons
+                    name={
+                      option === "student"
+                        ? "school-outline"
+                        : "briefcase-outline"
+                    }
+                    size={16}
+                    color={isActive ? "#fff" : COLORS.muted}
+                  />
+                  <Text
+                    style={{
+                      fontWeight: "700",
+                      fontSize: 14,
+                      color: isActive ? "#fff" : COLORS.muted,
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-        </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={{
-            backgroundColor: COLORS.navy2,
+            backgroundColor: loading ? COLORS.blue : COLORS.navy2,
             borderRadius: RADIUS.button,
             paddingVertical: 14,
             alignItems: "center",
             marginTop: SPACING.md,
           }}
+          disabled={loading}
           onPress={async () => {
+            if (!fullName || !email || !password || !confirmPassword) {
+              Alert.alert("Missing fields", "Please fill in all fields.");
+              return;
+            }
+            if (password !== confirmPassword) {
+              Alert.alert("Password mismatch", "Passwords do not match.");
+              return;
+            }
             try {
-              const payload = {
+              setLoading(true);
+              const result = await registerUser({
                 name: fullName,
                 email,
                 password,
                 role,
-              };
-
-              const result = await registerUser(payload);
-
-              console.log("Register success:", result);
-
-              router.replace("/auth/login");
+              });
+              // Save token so the user stays logged in
+              await AsyncStorage.setItem("token", result.token);
+              router.replace("/(tabs)/home");
             } catch (error) {
-              console.log("Register error:", error.message);
+              Alert.alert("Registration failed", error.message);
+            } finally {
+              setLoading(false);
             }
           }}
         >
-          <Text style={TYPO.button}>Register</Text>
+          <Text style={TYPO.button}>
+            {loading ? "Creating account…" : "Register"}
+          </Text>
         </TouchableOpacity>
 
         <View style={{ marginTop: SPACING.lg, alignItems: "center" }}>

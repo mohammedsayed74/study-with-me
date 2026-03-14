@@ -1,42 +1,36 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { COLORS, RADIUS, SPACING, TYPO } from "../src/theme/theme";
+import { COLORS } from "../src/theme/theme";
 
-export default function HomeScreen() {
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem("token");
-      router.replace("/auth/login");
-    } catch (error) {
-      console.log("Logout error:", error);
-    }
-  };
+export default function Index() {
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (token) {
+          router.replace("/(tabs)/home");
+        } else {
+          router.replace("/auth/login");
+        }
+      } catch {
+        router.replace("/auth/login");
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: COLORS.white,
         justifyContent: "center",
         alignItems: "center",
-        padding: SPACING.lg,
+        backgroundColor: COLORS.white,
       }}
     >
-      <Text style={[TYPO.h2, { marginBottom: SPACING.lg }]}>Home Screen</Text>
-
-      <TouchableOpacity
-        onPress={handleLogout}
-        style={{
-          backgroundColor: COLORS.navy2,
-          paddingVertical: 14,
-          paddingHorizontal: 28,
-          borderRadius: RADIUS.button,
-        }}
-      >
-        <Text style={TYPO.button}>Log Out</Text>
-      </TouchableOpacity>
+      <ActivityIndicator size="large" color={COLORS.navy2} />
     </View>
   );
 }

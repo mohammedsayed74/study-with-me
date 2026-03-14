@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
@@ -10,6 +10,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   return (
     <View
@@ -84,29 +85,27 @@ export default function Login() {
 
         <TouchableOpacity
           style={{
-            backgroundColor: COLORS.navy2,
+            backgroundColor: loading ? COLORS.blue : COLORS.navy2,
             borderRadius: RADIUS.button,
             paddingVertical: 14,
             alignItems: "center",
             marginTop: SPACING.lg,
           }}
+          disabled={loading}
           onPress={async () => {
             try {
-              const payload = {
-                email,
-                password,
-              };
-
-              const result = await loginUser(payload);
+              setLoading(true);
+              const result = await loginUser({ email, password });
               await AsyncStorage.setItem("token", result.token);
-              console.log("Login success:", result);
               router.replace("/(tabs)/home");
             } catch (error) {
-              console.log("Login error:", error.message);
+              Alert.alert("Login failed", error.message || "Invalid email or password.");
+            } finally {
+              setLoading(false);
             }
           }}
         >
-          <Text style={TYPO.button}>Log In</Text>
+          <Text style={TYPO.button}>{loading ? "Logging in…" : "Log In"}</Text>
         </TouchableOpacity>
 
         <View style={{ marginTop: SPACING.lg, alignItems: "center" }}>
