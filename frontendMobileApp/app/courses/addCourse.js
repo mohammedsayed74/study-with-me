@@ -5,133 +5,248 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
-import { COLORS } from '../../src/theme/theme';
-
-const initialCourseData = {
-  title: '',
-  description: '',
-  courseCode: '',
-};
+import { Feather } from '@expo/vector-icons';
+import { COLORS, RADIUS, SPACING, TYPO } from '../../src/theme/theme';
+import { createCourse } from '../../src/services/coursesService';
 
 export default function AddCourse() {
-  const [course, setCourse] = useState(initialCourseData);
+  const [title, setTitle] = useState('');
+  const [courseCode, setCourseCode] = useState('');
+  const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleChange = (field, value) => {
-    setCourse({ ...course, [field]: value });
-  };
+  const handleAddCourse = async () => {
+    setError('');
 
-  const handleAddCourse = () => {
-    
-    router.push('/(tabs)/courses');
+    if (!title.trim()) return setError('Course title is required.');
+    if (!courseCode.trim()) return setError('Course code is required.');
+    if (!description.trim()) return setError('Description is required.');
+
+    setLoading(true);
+    try {
+      await createCourse(title.trim(), courseCode.trim().toUpperCase(), description.trim());
+      Alert.alert('Success', 'Course created successfully!', [
+        { text: 'OK', onPress: () => router.replace('/(tabs)/courses') },
+      ]);
+    } catch (err) {
+      setError(err.message || 'Failed to create course.');
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.card}>
-        <Text style={styles.header}>Add New Course</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.back()}
+            disabled={loading}
+          >
+            <Feather name="arrow-left" size={22} color={COLORS.navy2} />
+          </TouchableOpacity>
+          <Text style={styles.pageTitle}>Add New Course</Text>
+        </View>
 
-        <Text style={styles.label}>Course Title</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="E.g. Introduction to React"
-          value={course.title}
-          onChangeText={(value) => handleChange('title', value)}
-        />
+        <View style={styles.card}>
+          {/* Error */}
+          {error ? (
+            <View style={styles.errorBox}>
+              <Feather name="alert-circle" size={15} color={COLORS.error} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
 
-        <Text style={styles.label}>Course Code</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="E.g. CS101"
-          value={course.courseCode}
-          onChangeText={(value) => handleChange('courseCode', value)}
-        />
+          <Text style={styles.label}>Course Title</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="E.g. Introduction to React"
+            placeholderTextColor={COLORS.muted}
+            value={title}
+            onChangeText={setTitle}
+            editable={!loading}
+            autoFocus
+          />
 
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Describe the course..."
-          multiline
-          numberOfLines={4}
-          value={course.description}
-          onChangeText={(value) => handleChange('description', value)}
-        />
+          <Text style={styles.label}>Course Code</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="E.g. CS101"
+            placeholderTextColor={COLORS.muted}
+            value={courseCode}
+            onChangeText={setCourseCode}
+            editable={!loading}
+            autoCapitalize="characters"
+          />
 
-        <TouchableOpacity style={styles.button} onPress={handleAddCourse}>
-          <Text style={styles.buttonText}>Create Course</Text>
-        </TouchableOpacity>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Describe the course..."
+            placeholderTextColor={COLORS.muted}
+            multiline
+            numberOfLines={4}
+            value={description}
+            onChangeText={setDescription}
+            editable={!loading}
+            textAlignVertical="top"
+          />
 
-        <TouchableOpacity onPress={() => router.push('/(tabs)/courses')}>
-          <Text style={styles.backText}>Back to Home</Text>
-        </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={[styles.btn, styles.btnSecondary]}
+              onPress={() => router.back()}
+              disabled={loading}
+            >
+              <Text style={styles.btnSecondaryText}>Cancel</Text>
+            </TouchableOpacity>
 
-      </View>
-    </View>
+            <TouchableOpacity
+              style={[styles.btn, styles.btnPrimary, loading && styles.btnDisabled]}
+              onPress={handleAddCourse}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Feather name="plus-circle" size={16} color="#fff" />
+                  <Text style={styles.btnPrimaryText}>Create Course</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
+
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#e6edf2',
+    backgroundColor: COLORS.white,
+  },
+  content: {
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 60,
+    paddingBottom: SPACING.md,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    gap: SPACING.sm,
+  },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.card,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
-
+  pageTitle: {
+    ...TYPO.h2,
+    fontSize: 20,
+  },
   card: {
-    width: '100%',
-    backgroundColor: '#dbe7ef',
-    padding: 25,
-    borderRadius: 20,
+    margin: SPACING.lg,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.card,
   },
-
-  header: {
-    fontSize: 26,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 25,
-    color: '#1a2a3a',
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFEBEE',
+    padding: SPACING.sm,
+    borderRadius: RADIUS.input,
+    marginBottom: SPACING.md,
   },
-
+  errorText: {
+    flex: 1,
+    color: COLORS.error,
+    fontSize: 13,
+  },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 6,
-    color: '#1a2a3a',
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+    marginTop: SPACING.md,
   },
-
   input: {
-    backgroundColor: '#f1f4f6',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    marginBottom: 18,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.input,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 13,
+    fontSize: 14,
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-
   textArea: {
-    height: 90,
+    height: 100,
     textAlignVertical: 'top',
   },
-
-  button: {
-    backgroundColor:COLORS.blueSoft,
-    paddingVertical: 14,
-    borderRadius: 25,
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+  },
+  btn: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
-    marginBottom: 15,
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: RADIUS.button,
   },
-
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  btnSecondary: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    flex: 0.8,
   },
-
-  backText: {
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600',
+  btnSecondaryText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.muted,
+  },
+  btnPrimary: {
+    backgroundColor: COLORS.navy2,
+    flex: 1.2,
+  },
+  btnPrimaryText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: COLORS.white,
+  },
+  btnDisabled: {
+    opacity: 0.6,
   },
 });
+

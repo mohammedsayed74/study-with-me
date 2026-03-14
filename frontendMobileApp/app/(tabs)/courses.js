@@ -30,7 +30,16 @@ export default function CoursesScreen() {
   }, []);
 
   const renderCourse = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.75}
+      onPress={() =>
+        router.push({
+          pathname: "/courses/[courseCode]",
+          params: { courseCode: item.courseCode },
+        })
+      }
+    >
       <View style={styles.headerRow}>
         <View style={{ width: 200 }}>
           <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
@@ -47,7 +56,16 @@ export default function CoursesScreen() {
 
       {isAdmin && (
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={(e) => {
+              e.stopPropagation?.();
+              router.push({
+                pathname: "/courses/editCourse",
+                params: { courseCode: item.courseCode },
+              });
+            }}
+          >
             <Feather name="edit" size={18} color={COLORS.navy2} />
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
@@ -58,7 +76,7 @@ export default function CoursesScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
