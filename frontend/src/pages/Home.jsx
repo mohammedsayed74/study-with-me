@@ -40,6 +40,7 @@ function Home() {
   };
 
   const deleteCourse = async (courseCode) => {
+    if (!window.confirm(`Are you sure you want to delete this course?`)) return;
     try {
       const token = localStorage.getItem("token");
 

@@ -5,9 +5,10 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
-import { getCourses } from "../../src/services/coursesService";
+import { getCourses, deleteCourse } from "../../src/services/coursesService";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,6 +29,28 @@ export default function CoursesScreen() {
 
     fetchCourses();
   }, []);
+
+  const handleDelete = (courseCode) => {
+    Alert.alert(
+      "Delete Course",
+      "Are you sure you want to delete this course?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteCourse(courseCode);
+              setCourses((prev) => prev.filter((c) => c.courseCode !== courseCode));
+            } catch (error) {
+              Alert.alert("Error", error.message || "Failed to delete course");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const renderCourse = ({ item }) => (
     <TouchableOpacity
@@ -70,7 +93,10 @@ export default function CoursesScreen() {
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteBtn}>
+          <TouchableOpacity
+            style={styles.deleteBtn}
+            onPress={() => handleDelete(item.courseCode)}
+          >
             <Feather name="trash-2" size={18} color="red" />
             <Text style={styles.deleteText}>Delete</Text>
           </TouchableOpacity>
