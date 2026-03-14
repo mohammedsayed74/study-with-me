@@ -11,8 +11,8 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding/index" />
-        
-        
+        <Stack.Screen name="courses/[courseCode]" />
+        <Stack.Screen name="courses/uploadMaterial" />
       </Stack>
       <StatusBar style="dark" />
     </>
