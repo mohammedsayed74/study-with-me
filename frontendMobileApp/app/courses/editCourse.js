@@ -111,7 +111,6 @@ export default function EditCourseScreen() {
               placeholder="e.g. Introduction to React"
               placeholderTextColor={COLORS.muted}
               editable={!saving}
-              autoFocus
             />
 
             {/* Description */}

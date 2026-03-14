@@ -48,3 +48,17 @@ export const updateCourse = async (courseCode, title, description) => {
   if (!res.ok) throw new Error(data.message || "Failed to update course");
   return data;
 };
+
+export const deleteCourse = async (courseCode) => {
+  const token = await AsyncStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/courses/${courseCode}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to delete course");
+  return data;
+};
+
