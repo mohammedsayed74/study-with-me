@@ -19,19 +19,39 @@ import { getProfile } from "../../src/services/profileService";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
 
 function GenderModal({ visible, selected, onSelect, onClose }) {
-  const options = ["Male", "Female", "Other"];
+  const options = ["Male", "Female"];
   return (
-    <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
-      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
+    <Modal
+      transparent
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <TouchableOpacity
+        style={styles.modalOverlay}
+        activeOpacity={1}
+        onPress={onClose}
+      >
         <View style={styles.modalBox}>
           <Text style={styles.modalTitle}>Select Gender</Text>
           {options.map((opt) => (
             <TouchableOpacity
               key={opt}
-              style={[styles.modalOption, selected === opt && styles.modalOptionActive]}
-              onPress={() => { onSelect(opt); onClose(); }}
+              style={[
+                styles.modalOption,
+                selected === opt && styles.modalOptionActive,
+              ]}
+              onPress={() => {
+                onSelect(opt);
+                onClose();
+              }}
             >
-              <Text style={[styles.modalOptionText, selected === opt && styles.modalOptionTextActive]}>
+              <Text
+                style={[
+                  styles.modalOptionText,
+                  selected === opt && styles.modalOptionTextActive,
+                ]}
+              >
                 {opt}
               </Text>
               {selected === opt && (
@@ -47,7 +67,13 @@ function GenderModal({ visible, selected, onSelect, onClose }) {
 
 function Avatar({ name }) {
   const initials = name
-    ? name.trim().split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)
+    ? name
+        .trim()
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : "?";
   return (
     <View style={styles.avatarRing}>
@@ -88,7 +114,10 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("token");
-      if (!token) { router.replace("/auth/login"); return; }
+      if (!token) {
+        router.replace("/auth/login");
+        return;
+      }
 
       const decoded = jwtDecode(token);
       setRole(decoded.role || "student");
@@ -97,10 +126,20 @@ export default function ProfileScreen() {
       const userEmail = data.user.email;
       setEmail(userEmail);
 
-      setName((await AsyncStorage.getItem(`profileName_${userEmail}`)) || data.user.name || "");
-      setNickName((await AsyncStorage.getItem(`profileNickName_${userEmail}`)) || "");
-      setGender((await AsyncStorage.getItem(`profileGender_${userEmail}`)) || "");
-      setDescription((await AsyncStorage.getItem(`profileDesc_${userEmail}`)) || "");
+      setName(
+        (await AsyncStorage.getItem(`profileName_${userEmail}`)) ||
+          data.user.name ||
+          "",
+      );
+      setNickName(
+        (await AsyncStorage.getItem(`profileNickName_${userEmail}`)) || "",
+      );
+      setGender(
+        (await AsyncStorage.getItem(`profileGender_${userEmail}`)) || "",
+      );
+      setDescription(
+        (await AsyncStorage.getItem(`profileDesc_${userEmail}`)) || "",
+      );
     } catch (err) {
       setError(err.message || "Failed to load profile.");
     } finally {
@@ -108,7 +147,9 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  useEffect(() => { loadProfile(); }, [loadProfile]);
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleToggleEdit = async () => {
     if (isEditing) {
@@ -147,7 +188,9 @@ export default function ProfileScreen() {
     return (
       <View style={styles.centerScreen}>
         <Ionicons name="alert-circle-outline" size={48} color={COLORS.error} />
-        <Text style={[TYPO.body, { marginTop: 12, textAlign: "center" }]}>{error}</Text>
+        <Text style={[TYPO.body, { marginTop: 12, textAlign: "center" }]}>
+          {error}
+        </Text>
         <TouchableOpacity style={styles.retryBtn} onPress={loadProfile}>
           <Text style={TYPO.button}>Retry</Text>
         </TouchableOpacity>
@@ -170,7 +213,12 @@ export default function ProfileScreen() {
 
       <View style={styles.nameRow}>
         <Text style={styles.displayName}>{name || "Your Name"}</Text>
-        <View style={[styles.roleBadge, role === "teacher" && styles.roleBadgeTeacher]}>
+        <View
+          style={[
+            styles.roleBadge,
+            role === "teacher" && styles.roleBadgeTeacher,
+          ]}
+        >
           <Text style={styles.roleBadgeText}>
             {role === "teacher" ? "Teacher" : "Student"}
           </Text>
@@ -188,7 +236,9 @@ export default function ProfileScreen() {
             size={18}
             color="#fff"
           />
-          <Text style={styles.editBtnText}>{isEditing ? "Save" : "Edit Profile"}</Text>
+          <Text style={styles.editBtnText}>
+            {isEditing ? "Save" : "Edit Profile"}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -229,7 +279,11 @@ export default function ProfileScreen() {
 
         <FieldCard label="Gender">
           <TouchableOpacity
-            style={[styles.input, styles.inputRow, isEditing && styles.inputEditing]}
+            style={[
+              styles.input,
+              styles.inputRow,
+              isEditing && styles.inputEditing,
+            ]}
             onPress={() => isEditing && setShowGenderModal(true)}
             activeOpacity={isEditing ? 0.7 : 1}
           >
@@ -244,7 +298,11 @@ export default function ProfileScreen() {
 
         <FieldCard label="About Me">
           <TextInput
-            style={[styles.input, styles.textarea, isEditing && styles.inputEditing]}
+            style={[
+              styles.input,
+              styles.textarea,
+              isEditing && styles.inputEditing,
+            ]}
             value={description}
             editable={isEditing}
             onChangeText={setDescription}
