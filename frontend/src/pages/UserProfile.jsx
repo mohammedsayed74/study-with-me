@@ -12,7 +12,6 @@ const UserProfile = () => {
   const [gender, setGender] = useState("");
   const [description, setDescription] = useState("");
 
-  // Edit mode
   const [isEditing, setIsEditing] = useState(false);
 
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,6 @@ const UserProfile = () => {
         const userEmail = fetchedUser.email;
         setEmail(userEmail);
 
-        // Load local features if exist, else from fetched profile
         const localName = localStorage.getItem(`profileName_${userEmail}`);
         setName(localName || fetchedUser.name || "");
 
@@ -112,12 +110,11 @@ const UserProfile = () => {
         top: 0,
         left: 0,
         backgroundColor: "#fff",
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
         boxSizing: "border-box",
         overflowX: "hidden",
       }}
     >
-      {/* Top Gradient Header */}
       <div
         style={{
           height: "140px",
@@ -126,28 +123,10 @@ const UserProfile = () => {
           position: "relative",
         }}
       >
-        <button
-          onClick={() => navigate("/home")}
-          style={{
-            position: "absolute",
-            top: "20px",
-            left: "20px",
-            padding: "0.6rem 1.5rem",
-            backgroundColor: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "600",
-            color: "#333",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-          }}
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-          Back
-        </button>
+        <button className="back-btn" onClick={() => navigate("/home")}>
+        <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
+        Back
+      </button>
       </div>
 
       <div
@@ -158,7 +137,6 @@ const UserProfile = () => {
           backgroundColor: "#fff",
         }}
       >
-        {/* User Info Header (Buttons Added) */}
         <div
           style={{
             display: "flex",
@@ -229,7 +207,6 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* Form Grid */}
         <div
           style={{
             display: "grid",
@@ -239,7 +216,6 @@ const UserProfile = () => {
             marginBottom: "3.5rem",
           }}
         >
-          {/* Full Name */}
           <div>
             <label
               style={{
@@ -278,7 +254,6 @@ const UserProfile = () => {
             />
           </div>
 
-          {/* Nick Name */}
           <div>
             <label
               style={{
@@ -317,7 +292,6 @@ const UserProfile = () => {
             />
           </div>
 
-          {/* Gender */}
           <div>
             <label
               style={{
@@ -379,7 +353,6 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* My Description */}
           <div style={{ gridColumn: "1 / -1" }}>
             <label
               style={{
@@ -421,7 +394,6 @@ const UserProfile = () => {
           </div>
         </div>
 
-        {/* Email Address Section */}
         <div>
           <h3
             style={{

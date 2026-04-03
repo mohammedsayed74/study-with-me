@@ -17,21 +17,21 @@ const uploadMaterial = async (req, res) => {
         .json({ message: `title and course code must be provided` });
     }
 
-    const pdfUrl = req.file.path;
-    const status = req.user.role === `teacher` ? `approved`:`pending`;
+    const pdfUrl = req.file.secure_url || req.file.path;
+    const status = req.user.role === `teacher` ? `approved` : `pending`;
 
     const material = await Material.create({
       title,
       courseCode: courseCode.toUpperCase(),
       pdfUrl,
-      pdfPublicId: req.file.filename,
+      pdfPublicId: req.file.public_id || req.file.filename,
       uploadedBy: req.user._id,
-      status:status
+      status: status
     });
 
     res.status(201).json({
       success: true,
-      message: status === `pending` ? `material uploaded successfully ! waiting for TA to approve !`: `material uploaded successfully !`,
+      message: status === `pending` ? `material uploaded successfully ! waiting for TA to approve !` : `material uploaded successfully !`,
       data: material,
     });
   } catch (error) {
@@ -125,10 +125,52 @@ const deleteMaterial = async (req, res) => {
   }
 };
 
+const rateMaterial = async (req, res) => {
+  try {
+    const { score } = req.body;
+    const materialId = req.params.id;
+    const userId = req.user._id;
+
+    if (!score || score < 1 || score > 5) {
+      return res.status(400).json({ message: `Invalid score !` });
+    }
+
+    const material = await Material.findById(materialId);
+
+    if (!material) {
+      return res.status(400).json({ message: `Material not found` });
+    }
+
+    const ratingIndex = material.ratings.findIndex((rating) => rating.user.toString() === userId.toString());
+
+    if (!~ratingIndex) {
+      material.ratings.push({ user: userId, score: +score });
+    } else {
+      material.ratings[ratingIndex].score = +score;
+    }
+
+    material.totalRatings = material.ratings.length;
+    const totalScore = material.ratings.reduce((ans, rating) => ans + rating.score, 0);
+    material.averageRating = Math.round((totalScore / material.totalRatings) * 10) / 10;
+
+    await material.save();
+
+    res.status(200).json({
+      success: true,
+      message: `material rated successfully !`,
+      data: material,
+    });
+  }
+  catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 module.exports = {
   uploadMaterial,
   getApprovedMaterials,
   getPendingMaterials,
   approveMaterial,
   deleteMaterial,
+  rateMaterial
 };

@@ -1,4 +1,3 @@
-/* ── Tailwind Configuration Mapping ── */
 :root {
   --primary: #2b8cee;
   --bg-base: #F8FCFF;
@@ -9,7 +8,6 @@
   --pale-blue: #C1EBFF;
 }
 
-/* ── Override global #root constraints ── */
 body:has(.auth-page) {
   margin: 0;
   padding: 0;
@@ -25,12 +23,11 @@ body:has(.auth-page) #root {
   width: 100%;
 }
 
-/* ── Page Wrapper (body classes from provided HTML) ── */
+
 .auth-page {
-  /* bg-pale-blue/30 text-text-main font-display overflow-x-hidden min-h-screen flex flex-col items-center justify-center p-6 relative */
   background-color: #F8FCFF;
   color: var(--text-main);
-  font-family: 'Lexend', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
   width: 100%;
@@ -43,9 +40,7 @@ body:has(.auth-page) #root {
   box-sizing: border-box;
 }
 
-/* ── Background Blobs ── */
 .auth-blob-1 {
-  /* absolute top-0 left-1/4 h-[500px] w-[500px] rounded-full bg-pale-blue/60 blur-[120px] -z-10 */
   position: absolute;
   top: 0;
   left: 25%;
@@ -59,7 +54,6 @@ body:has(.auth-page) #root {
 }
 
 .auth-blob-2 {
-  /* absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/10 blur-[100px] -z-10 */
   position: absolute;
   bottom: 0;
   right: 25%;
@@ -72,9 +66,7 @@ body:has(.auth-page) #root {
   pointer-events: none;
 }
 
-/* ── Brand Header ── */
 .auth-brand {
-  /* flex items-center gap-3 mb-8 */
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -82,32 +74,25 @@ body:has(.auth-page) #root {
 }
 
 .auth-brand-icon {
-  /* flex items-center justify-center rounded-xl bg-white p-2 shadow-sm border border-soft-blue/20 */
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 3rem;
-  /* rounded-xl based on provided config {"xl": "3rem"} */
   background-color: #ffffff;
   padding: 0.5rem;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  /* shadow-sm */
   border: 1px solid rgba(125, 160, 202, 0.2);
-  /* soft-blue/20 */
 }
 
 .auth-brand h2 {
-  /* text-text-main text-2xl font-bold leading-tight tracking-[-0.015em] */
   color: var(--text-main);
   font-size: 1.5rem;
-  /* 2xl */
   line-height: 1.25;
   font-weight: 700;
   letter-spacing: -0.015em;
   margin: 0;
 }
 
-/* ── Glass Panel ── */
 .auth-card {
   background: rgba(193, 235, 255, 0.3);
   backdrop-filter: blur(12px);
@@ -131,7 +116,6 @@ body:has(.auth-page) #root {
   }
 }
 
-/* ── Form Heading Context ── */
 .auth-card-header {
   text-align: center;
 }
@@ -153,14 +137,12 @@ body:has(.auth-page) #root {
   margin: 0;
 }
 
-/* ── Form Container ── */
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: 9px;
 }
 
-/* ── Input Wrappers ── */
 .auth-input-group {
   position: relative;
 }
@@ -200,7 +182,7 @@ body:has(.auth-page) #root {
   font-size: 24px;
 }
 
-/* ── Input Fields ── */
+ 
 .auth-input-group input,
 .auth-input-group select {
   width: 100%;
@@ -231,7 +213,6 @@ body:has(.auth-page) #root {
   cursor: pointer;
 }
 
-/* ── Error Text ── */
 .auth-error {
   background: #ffe5e5;
   color: #d8000c;
@@ -241,7 +222,6 @@ body:has(.auth-page) #root {
   margin-top: -0.5rem;
 }
 
-/* ── Submit Button ── */
 .auth-submit {
   margin-top: 1rem;
   display: flex;
@@ -275,7 +255,6 @@ body:has(.auth-page) #root {
   font-size: 20px;
 }
 
-/* ── Footer Link ── */
 .auth-footer {
   margin-top: 2rem;
   color: rgba(5, 40, 89, 0.7);

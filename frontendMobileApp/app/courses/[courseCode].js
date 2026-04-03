@@ -30,7 +30,7 @@ export default function CourseMaterialsScreen() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("approved");
   const [isTeacher, setIsTeacher] = useState(false);
-  const [actionLoading, setActionLoading] = useState(null); // materialId being acted on
+  const [actionLoading, setActionLoading] = useState(null);
 
   const fetchMaterials = useCallback(async () => {
     setLoading(true);

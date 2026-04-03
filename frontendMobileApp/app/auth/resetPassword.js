@@ -75,12 +75,10 @@ export default function ResetPasswordScreen() {
       setFeedback({ type: "success", message: data.message || "Password updated successfully!" });
       setLoading(false);
 
-      // Clear fields
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
 
-      // Navigate back after brief delay
       setTimeout(() => {
         router.back();
       }, 1800);
@@ -100,7 +98,6 @@ export default function ResetPasswordScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backBtn}
@@ -116,7 +113,6 @@ export default function ResetPasswordScreen() {
         </View>
 
         <View style={styles.card}>
-          {/* Feedback banner */}
           {feedback.message ? (
             <View
               style={[
@@ -140,7 +136,6 @@ export default function ResetPasswordScreen() {
             </View>
           ) : null}
 
-          {/* Password hint */}
           <View style={styles.hintBox}>
             <Feather name="shield" size={14} color={COLORS.blue} />
             <Text style={styles.hintText}>
@@ -148,7 +143,6 @@ export default function ResetPasswordScreen() {
             </Text>
           </View>
 
-          {/* Current Password */}
           <Text style={styles.label}>Current Password</Text>
           <PasswordInput
             value={currentPassword}
@@ -159,7 +153,6 @@ export default function ResetPasswordScreen() {
             editable={!loading}
           />
 
-          {/* New Password */}
           <Text style={styles.label}>New Password</Text>
           <PasswordInput
             value={newPassword}
@@ -170,7 +163,6 @@ export default function ResetPasswordScreen() {
             editable={!loading}
           />
 
-          {/* Confirm New Password */}
           <Text style={styles.label}>Confirm New Password</Text>
           <PasswordInput
             value={confirmPassword}
@@ -181,7 +173,6 @@ export default function ResetPasswordScreen() {
             editable={!loading}
           />
 
-          {/* Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={[styles.btn, styles.btnSecondary]}

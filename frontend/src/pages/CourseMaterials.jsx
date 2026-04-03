@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import "./materials.css";
+import StarRating from "../components/StarRating";
 
 function CourseMaterials() {
   const { courseCode } = useParams();
+  const navigate = useNavigate();
 
   const [materials, setMaterials] = useState([]);
   const [pendingMaterials, setPendingMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("approved"); // 'approved' or 'pending'
+  const [activeTab, setActiveTab] = useState("approved"); 
 
-  // Extract user info from token (fallback mechanism if no context is provided)
+
   const token = localStorage.getItem("token");
   let user = null;
   if (token) {
@@ -123,6 +125,7 @@ function CourseMaterials() {
                 <span className="material-symbols-outlined">person</span>
                 {material.uploadedBy?.name || "Unknown"}
               </div>
+              {!isPendingView && <StarRating material={material} />}
             </div>
 
             <div className="material-actions">
@@ -174,8 +177,14 @@ function CourseMaterials() {
 
   return (
     <div className="materials-page">
+      
       <div className="materials-blob-1"></div>
       <div className="materials-blob-2"></div>
+
+      <button className="back-btn" onClick={() => navigate("/home")}>
+        <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
+        Back
+      </button>
 
       <div className="materials-header">
         <h1>{courseCode} Materials</h1>

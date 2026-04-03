@@ -41,16 +41,12 @@ const ResetPassword = () => {
     };
 
     const validatePass = (pass) => {
-        // Length check (8 chars)
         if (pass.length < 8) return "Password must be at least 8 characters long";
         
-        // No spaces
         if (pass.includes(" ")) return "Password cannot contain spaces";
         
-        // Uppercase check
         if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter";
         
-        // Symbol check (allow all common symbols)
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Password must contain at least one symbol (e.g., @, #)";
         
         return null;
@@ -85,7 +81,6 @@ const ResetPassword = () => {
             setFeedback({ type: "success", message: response.data.message });
             setLoading(false);
             
-            // Redirect after success
             setTimeout(() => {
                 navigate("/profile");
             }, 2000);
@@ -106,11 +101,10 @@ const ResetPassword = () => {
             top: 0,
             left: 0,
             backgroundColor: "#fff", 
-            fontFamily: "'Inter', sans-serif",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
             boxSizing: "border-box",
             overflowX: "hidden"
         }}>
-            {/* Top Gradient Header */}
             <div style={{ 
                 height: "140px", 
                 width: "100%", 
@@ -143,7 +137,6 @@ const ResetPassword = () => {
 
             <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2rem", backgroundColor: "#fff" }}>
                 
-                {/* Header title */}
                 <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
                     <h2 style={{ margin: 0, fontSize: "1.8rem", color: "#222", fontWeight: "700" }}>Reset Password</h2>
                     <p style={{ margin: "5px 0 0 0", color: "#888", fontSize: "0.95rem" }}>Update your security credentials below</p>
@@ -170,7 +163,6 @@ const ResetPassword = () => {
 
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "500px", margin: "0 auto" }}>
                     
-                    {/* Current Password */}
                     <div>
                         <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>Current Password</label>
                         <div style={{ position: "relative" }}>
@@ -221,7 +213,6 @@ const ResetPassword = () => {
                         </div>
                     </div>
 
-                    {/* New Password */}
                     <div>
                         <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>New Password</label>
                         <div style={{ position: "relative" }}>
@@ -272,7 +263,6 @@ const ResetPassword = () => {
                         </div>
                     </div>
 
-                    {/* Confirm Password */}
                     <div>
                         <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>Confirm New Password</label>
                         <div style={{ position: "relative" }}>
@@ -323,7 +313,6 @@ const ResetPassword = () => {
                         </div>
                     </div>
 
-                    {/* Submit Button */}
                     <button
                         type="submit"
                         disabled={loading}

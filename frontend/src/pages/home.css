@@ -26,7 +26,7 @@ body:has(.home-page) #root {
 .home-page {
   background-color: #F8FCFF;
   color: var(--text-main);
-  font-family: 'Lexend', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
   width: 100%;

@@ -21,7 +21,7 @@ export default function UploadMaterialScreen() {
   const { courseCode } = useLocalSearchParams();
 
   const [title, setTitle] = useState("");
-  const [file, setFile] = useState(null); // { uri, name, size }
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
 
@@ -111,7 +111,6 @@ export default function UploadMaterialScreen() {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -127,7 +126,6 @@ export default function UploadMaterialScreen() {
       </View>
 
       <View style={styles.card}>
-        {/* Feedback */}
         {feedback.message ? (
           <View
             style={[
@@ -202,7 +200,6 @@ export default function UploadMaterialScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Info note for students */}
         <View style={styles.infoBox}>
           <Feather name="info" size={14} color={COLORS.blue} />
           <Text style={styles.infoText}>

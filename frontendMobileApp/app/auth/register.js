@@ -183,7 +183,6 @@ export default function Register() {
                 password,
                 role,
               });
-              // Save token so the user stays logged in
               await AsyncStorage.setItem("token", result.token);
               router.replace("/(tabs)/home");
             } catch (error) {

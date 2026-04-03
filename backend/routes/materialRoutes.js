@@ -5,6 +5,7 @@ const {
   getPendingMaterials,
   approveMaterial,
   deleteMaterial,
+  rateMaterial
 } = require("../controllers/materialControllers");
 
 
@@ -24,10 +25,10 @@ router.post(
   uploadMaterial,
 );
 
-
 router.patch("/:id/approve", requireAuth, approveMaterial);
 
-
 router.delete("/:id", requireAuth, deleteMaterial);
+
+router.patch("/:id/rate", requireAuth, rateMaterial);
 
 module.exports = router;

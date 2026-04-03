@@ -97,8 +97,8 @@ const getUserProfile = async (req, res) => {
   console.log("Profile route hit for user:", req.user?._id);
   try {
     const user = await User.findById(req.user._id).select('-hashedPassword');
-    
-    if (!user) {
+
+        if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
@@ -128,7 +128,6 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'Incorrect current password' });
     }
 
-    // Password validation logic
     if (newPassword.length < 8 || newPassword.includes(' ') || newPassword.trim() !== newPassword) {
         return res.status(400).json({ message: 'Invalid new password format' });
     }
