@@ -98,7 +98,7 @@ function CourseMaterials() {
           <span className="material-symbols-outlined materials-empty-icon">
             {isPendingView ? "task" : "folder_open"}
           </span>
-          <h3>{isPendingView ? "All caught up!" : "No requested materials yet."}</h3>
+          <h3>{isPendingView ? "All caught up!" : "No materials yet."}</h3>
           <p>
             {isPendingView
               ? "Hooray! No pending materials to review at the moment."
