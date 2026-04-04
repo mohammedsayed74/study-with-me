@@ -7,6 +7,28 @@ const getAuthHeaders = async () => {
     Authorization: `Bearer ${token}`,
   };
 };
+export const rateMaterial = async (materialId, score) => {
+  const token = await AsyncStorage.getItem("token");
+  const response = await fetch(`${API_BASE_URL}/api/materials/${materialId}/rate`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ score }),
+  });
+
+  const text = await response.text(); // read as text first
+  console.log("RAW RESPONSE:", text);  // check what's actually coming back
+
+  try {
+    const data = JSON.parse(text);
+    if (!response.ok) throw new Error(data.message || "Failed to rate material");
+    return data;
+  } catch {
+    throw new Error(`Server error: ${text}`);
+  }
+};
 
 export const getMaterials = async (courseCode) => {
   const headers = await getAuthHeaders();

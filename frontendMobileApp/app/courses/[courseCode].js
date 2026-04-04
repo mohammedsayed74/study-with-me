@@ -8,17 +8,20 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Modal,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
+import { FontAwesome } from "@expo/vector-icons";
 import {
   getMaterials,
   getPendingMaterials,
   approveMaterial,
   deleteMaterial,
+  rateMaterial,
 } from "../../src/services/materialsService";
 
 export default function CourseMaterialsScreen() {
@@ -31,6 +34,21 @@ export default function CourseMaterialsScreen() {
   const [activeTab, setActiveTab] = useState("approved");
   const [isTeacher, setIsTeacher] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+  const [ratings, setRatings] = useState({});
+  const [ratingModal, setRatingModal] = useState({ visible: false, id: null, temp: 0 });
+
+  const confirmRating = async () => {
+  if (ratingModal.temp === 0) return;
+  try {
+    await rateMaterial(ratingModal.id, ratingModal.temp);
+    setRatings((prev) => ({ ...prev, [ratingModal.id]: ratingModal.temp }));
+    await fetchMaterials();
+  } catch (err) {
+    Alert.alert("Error", err.message || "Failed to submit rating.");
+  } finally {
+    setRatingModal({ visible: false, id: null, temp: 0 });
+  }
+};
 
   const fetchMaterials = useCallback(async () => {
     setLoading(true);
@@ -101,7 +119,7 @@ export default function CourseMaterialsScreen() {
             }
           },
         },
-      ],
+      ]
     );
   };
 
@@ -125,10 +143,25 @@ export default function CourseMaterialsScreen() {
             <Text style={styles.cardTitle} numberOfLines={2}>
               {item.title}
             </Text>
+
             <Text style={styles.cardMeta}>
               <Feather name="user" size={11} color={COLORS.grey} />{" "}
               {item.uploadedBy?.name || "Unknown"}
             </Text>
+
+            <TouchableOpacity
+              onPress={() => setRatingModal({ visible: true, id: item._id, temp: ratings[item._id] || 0 })}
+              style={styles.ratingTrigger}
+            >
+              <FontAwesome
+                name={ratings[item._id] ? "star" : "star-o"}
+                size={13}
+                color={ratings[item._id] ? "#f5a623" : COLORS.grey}
+              />
+              <Text style={[styles.ratingLabel, ratings[item._id] && styles.ratingLabelActive]}>
+                {item.averageRating}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -198,12 +231,7 @@ export default function CourseMaterialsScreen() {
             style={[styles.tab, activeTab === "approved" && styles.activeTab]}
             onPress={() => setActiveTab("approved")}
           >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "approved" && styles.activeTabText,
-              ]}
-            >
+            <Text style={[styles.tabText, activeTab === "approved" && styles.activeTabText]}>
               Approved ({materials.length})
             </Text>
           </TouchableOpacity>
@@ -211,12 +239,7 @@ export default function CourseMaterialsScreen() {
             style={[styles.tab, activeTab === "pending" && styles.activeTab]}
             onPress={() => setActiveTab("pending")}
           >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "pending" && styles.activeTabText,
-              ]}
-            >
+            <Text style={[styles.tabText, activeTab === "pending" && styles.activeTabText]}>
               Pending ({pendingMaterials.length})
             </Text>
           </TouchableOpacity>
@@ -259,6 +282,46 @@ export default function CourseMaterialsScreen() {
           contentContainerStyle={{ padding: SPACING.lg, paddingBottom: 100 }}
         />
       )}
+
+      <Modal transparent visible={ratingModal.visible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Rate this material</Text>
+
+            <View style={styles.starsRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity
+                  key={star}
+                  onPress={() => setRatingModal((prev) => ({ ...prev, temp: star }))}
+                >
+                  <FontAwesome
+                    name={star <= ratingModal.temp ? "star" : "star-o"}
+                    size={32}
+                    color={star <= ratingModal.temp ? "#f5a623" : COLORS.border}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                onPress={() => setRatingModal({ visible: false, id: null, temp: 0 })}
+                style={styles.cancelBtn}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={confirmRating}
+                disabled={ratingModal.temp === 0}
+                style={[styles.confirmBtn, ratingModal.temp === 0 && styles.confirmBtnDisabled]}
+              >
+                <Text style={styles.confirmText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <TouchableOpacity
         style={styles.fab}
@@ -373,6 +436,22 @@ const styles = StyleSheet.create({
     color: COLORS.grey,
     marginTop: 3,
   },
+  ratingTrigger: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 6,
+    alignSelf: "flex-start",
+  },
+  ratingLabel: {
+    fontSize: 12,
+    color: COLORS.grey,
+  },
+  ratingLabelActive: {
+    color: "#f5a623",
+    fontWeight: "600",
+  },
+
   cardActions: {
     flexDirection: "row",
     gap: 6,
@@ -395,6 +474,64 @@ const styles = StyleSheet.create({
   deleteBtn: {
     backgroundColor: COLORS.error,
     borderColor: COLORS.error,
+  },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.card,
+    padding: SPACING.lg,
+    alignItems: "center",
+    width: "75%",
+    gap: SPACING.md,
+  },
+  modalTitle: {
+    ...TYPO.h2,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  starsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: SPACING.sm,
+    width: "100%",
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: RADIUS.button,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+  },
+  cancelText: {
+    fontSize: 14,
+    color: COLORS.muted,
+    fontWeight: "600",
+  },
+  confirmBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: RADIUS.button,
+    backgroundColor: COLORS.navy2,
+    alignItems: "center",
+  },
+  confirmBtnDisabled: {
+    opacity: 0.4,
+  },
+  confirmText: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: "600",
   },
 
   centered: {
