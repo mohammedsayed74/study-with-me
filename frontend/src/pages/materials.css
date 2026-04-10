@@ -250,6 +250,51 @@ body:has(.materials-page) #root {
   background-color: var(--success-hover);
 }
 
+/* Pagination container */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.pagination-btn {
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(43, 140, 238, 0.2);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #1a71c9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(43, 140, 238, 0.3);
+}
+
+.pagination-btn:disabled {
+  background-color: rgba(125, 160, 202, 0.3);
+  color: rgba(5, 40, 89, 0.5);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination-info {
+  font-weight: 700;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(125, 160, 202, 0.2);
+}
 .btn-danger {
   background-color: #ffe5e5;
   color: var(--danger);

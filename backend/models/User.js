@@ -12,6 +12,13 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
+    academicYear: {
+      type: Number,
+      enum: [1, 2, 3, 4],
+      required: function () {
+        return this.role === "student";
+      },
+    },
   },
   { timestamps: true },
 );

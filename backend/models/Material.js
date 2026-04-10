@@ -35,7 +35,7 @@ const materialSchema = new mongoose.Schema(
       {
         user: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
+          ref: "User",
           required: true,
         },
         score: {
@@ -53,11 +53,17 @@ const materialSchema = new mongoose.Schema(
     totalRatings: {
       type: Number,
       default: 0,
-    }
+    },
+    uploaderRole: {
+      type: String,
+      enum: ["student", "teacher"],
+      required: true,
+      default: "student",
+    },
   },
   {
     timestamps: true,
   },
 );
 
-module.exports = mongoose.model('Material', materialSchema);
+module.exports = mongoose.model("Material", materialSchema);

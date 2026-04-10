@@ -3,11 +3,11 @@ const mongoose = require(`mongoose`);
 
 const createCourse = async (req, res) => {
   try {
-    const { title, courseCode, description } = req.body;
-    if (!title || !courseCode || !description)
+    const { title, courseCode, description, department, year } = req.body;
+    if (!title || !courseCode || !description || !department || !year)
       return res
         .status(400)
-        .json({ message: `invalid title or course code , try again` });
+        .json({ message: `invalid inputs , try again` });
     const courseExists = await course.findOne({ courseCode });
     if (courseExists) {
       return res.status(400).json({ message: `course with this code already exists` });
@@ -17,6 +17,8 @@ const createCourse = async (req, res) => {
       title,
       courseCode,
       description,
+      department,
+      year: Number(year),
       admin: adminId,
     });
     return res
