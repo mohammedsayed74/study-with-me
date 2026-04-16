@@ -210,8 +210,22 @@ function CourseMaterials() {
       </button>
 
       <div className="materials-header">
+
         <h1>{courseCode} Materials</h1>
-        <p>Course resources</p>
+        <p> course resources</p>
+        <Link
+  to={`/course/${courseCode}/question-bank`}
+  className="material-btn btn-primary"
+  style={{
+    display: "inline-flex",
+    marginTop: "1rem",
+    padding: "0.6rem 1.5rem",
+    width: "auto"
+  }}
+>
+  Question Bank
+</Link>
+        <br/>
 
         <Link to={`/course/${courseCode}/upload`} className="material-btn btn-primary" style={{ display: 'inline-flex', marginTop: '1rem', padding: '0.6rem 1.5rem', width: 'auto' }}>
           <span className="material-symbols-outlined">add</span>

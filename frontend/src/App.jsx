@@ -8,7 +8,8 @@ import UserProfile from "./pages/UserProfile";
 import ResetPassword from "./pages/ResetPassword";
 import CourseMaterials from "./pages/CourseMaterials";
 import UploadMaterialPage from "./pages/UploadMaterialPage";
-
+import QuestionBank from "./pages/QuestionBank";
+import ChapterLevels from "./pages/ChapterLevels";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -87,6 +88,23 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+
+        <Route
+  path="/course/:courseCode/question-bank"
+  element={
+    <ProtectedRoute>
+      <QuestionBank />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/course/:courseCode/questions/:chapter"
+  element={<ProtectedRoute><ChapterLevels /></ProtectedRoute>}
+/>
 
       </Routes>
     </BrowserRouter>

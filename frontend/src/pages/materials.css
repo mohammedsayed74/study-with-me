@@ -309,7 +309,9 @@ body:has(.materials-page) #root {
   text-align: center;
   padding: 4rem 2rem;
   background: rgba(255, 255, 255, 0.4);
+  /*
   backdrop-filter: blur(12px);
+  */
   border-radius: 2rem;
   border: 1px dashed rgba(125, 160, 202, 0.5);
   width: 100%;
