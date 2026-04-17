@@ -51,15 +51,21 @@ const getQuizQuestions = async (req, res) => {
         if (chapter) query.chapter = Number(chapter);
         if (difficulty) query.difficulty = difficulty;
 
-        const questions = await Mcq.find(query)
-            .select('-correctAnswer -explanation -createdBy -__v');
-
-        const shuffledQuestions = questions.sort(() => 0.5 - Math.random());
+        let questions;
+        if (req.user && req.user.role === 'teacher') {
+            // Teachers see everything to manage them
+            questions = await Mcq.find(query).select('-__v');
+        } else {
+            // Students get stripped and shuffled questions
+            const rawQuestions = await Mcq.find(query)
+                .select('-correctAnswer -explanation -createdBy -__v');
+            questions = rawQuestions.sort(() => 0.5 - Math.random());
+        }
 
         res.status(200).json({
             success: true,
-            count: shuffledQuestions.length,
-            data: shuffledQuestions
+            count: questions.length,
+            data: questions
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

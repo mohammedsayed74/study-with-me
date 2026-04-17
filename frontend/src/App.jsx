@@ -11,6 +11,7 @@ import UploadMaterialPage from "./pages/UploadMaterialPage";
 import Dashboard from "./pages/Dashboard";
 import QuestionBank from "./pages/QuestionBank";
 import ChapterLevels from "./pages/ChapterLevels";
+import QuizArea from "./pages/QuizArea";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -113,6 +114,11 @@ function App() {
 <Route
   path="/course/:courseCode/questions/:chapter"
   element={<ProtectedRoute><ChapterLevels /></ProtectedRoute>}
+/>
+
+<Route
+  path="/course/:courseCode/questions/:chapter/:level"
+  element={<ProtectedRoute><QuizArea /></ProtectedRoute>}
 />
 
       </Routes>
