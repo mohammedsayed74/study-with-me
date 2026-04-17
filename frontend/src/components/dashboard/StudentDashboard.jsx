@@ -109,118 +109,101 @@ function StudentDashboard({ token }) {
         </div>
       </div>
 
-      {/* ── Two-column grid ── */}
-      <div className="dash-grid-2">
-        {/* My Latest Ratings */}
-        <DashboardCard
-          icon="rate_review"
-          title="My Latest Ratings"
-          count={ratings.length}
-          loading={loadingRatings}
-        >
-          {ratings.length === 0 ? (
-            <div className="dash-empty">
-              <div className="dash-empty-icon">
-                <span className="material-symbols-outlined">star_border</span>
-              </div>
-              <h4>No ratings yet</h4>
-              <p>Your ratings on uploaded materials will appear here.</p>
+      {/* My Latest Ratings */}
+      <DashboardCard
+        icon="rate_review"
+        title="My Latest Ratings"
+        count={ratings.length}
+        loading={loadingRatings}
+      >
+        {ratings.length === 0 ? (
+          <div className="dash-empty">
+            <div className="dash-empty-icon">
+              <span className="material-symbols-outlined">star_border</span>
             </div>
-          ) : (
-            <div className="dash-table-wrap">
-              <table className="dash-table">
-                <thead>
-                  <tr>
-                    <th>File</th>
-                    <th>Subject</th>
-                    <th>My Rating</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ratings.map((r) => (
-                    <tr key={r._id}>
-                      <td className="dash-table-title">{r.title}</td>
-                      <td>{r.courseCode}</td>
-                      <td>{renderStars(r.score)}</td>
-                      <td style={{ whiteSpace: "nowrap" }}>{formatDate(r.ratedAt)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </DashboardCard>
-
-        {/* My Latest Uploads */}
-        <DashboardCard
-          icon="cloud_upload"
-          title="My Latest Uploads"
-          count={uploads.length}
-          loading={loadingUploads}
-        >
-          {uploads.length === 0 ? (
-            <div className="dash-empty">
-              <div className="dash-empty-icon">
-                <span className="material-symbols-outlined">cloud_off</span>
-              </div>
-              <h4>No uploads yet</h4>
-              <p>Start contributing by uploading study materials.</p>
-            </div>
-          ) : (
-            <div className="dash-table-wrap">
-              <table className="dash-table">
-                <thead>
-                  <tr>
-                    <th>File</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {uploads.map((u) => (
-                    <tr key={u._id}>
-                      <td>
-                        <div className="dash-table-title">{u.title}</div>
-                        <div className="dash-table-sub">PDF</div>
-                      </td>
-                      <td>{u.courseCode}</td>
-                      <td style={{ whiteSpace: "nowrap" }}>{formatDate(u.createdAt)}</td>
-                      <td>
-                        <StatusBadge status={u.status} />
-                        {u.status === "rejected" && u.rejectionReason && (
-                          <div className="rejection-feedback">
-                            <div className="rejection-feedback-reason">
-                              {u.rejectionReason.replace("_", " ")}
-                            </div>
-                            {u.rejectionNote && (
-                              <div className="rejection-feedback-note">{u.rejectionNote}</div>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </DashboardCard>
-      </div>
-
-      {/* Activity History — placeholder */}
-      <DashboardCard icon="history" title="Activity History" loading={false}>
-        <div className="dash-empty">
-          <div className="dash-empty-icon">
-            <span className="material-symbols-outlined">update</span>
+            <h4>No ratings yet</h4>
+            <p>Your ratings on uploaded materials will appear here.</p>
           </div>
-          <h4>Activity tracking coming soon</h4>
-          <p>
-            Your file edits, deletions, and updates will be logged here in a
-            future update.
-          </p>
-        </div>
+        ) : (
+          <div className="dash-table-wrap">
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Subject</th>
+                  <th>My Rating</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ratings.map((r) => (
+                  <tr key={r._id}>
+                    <td className="dash-table-title">{r.title}</td>
+                    <td>{r.courseCode}</td>
+                    <td>{renderStars(r.score)}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>{formatDate(r.ratedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </DashboardCard>
+
+      {/* Latest 3 Uploads */}
+      <DashboardCard
+        icon="cloud_upload"
+        title="My Latest Uploads"
+        count={uploads.slice(0, 3).length}
+        loading={loadingUploads}
+      >
+        {uploads.length === 0 ? (
+          <div className="dash-empty">
+            <div className="dash-empty-icon">
+              <span className="material-symbols-outlined">cloud_off</span>
+            </div>
+            <h4>No uploads yet</h4>
+            <p>Start contributing by uploading study materials.</p>
+          </div>
+        ) : (
+          <div className="dash-table-wrap">
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Subject</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {uploads.slice(0, 3).map((u) => (
+                  <tr key={u._id}>
+                    <td>
+                      <div className="dash-table-title">{u.title}</div>
+                      <div className="dash-table-sub">PDF</div>
+                    </td>
+                    <td>{u.courseCode}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>{formatDate(u.createdAt)}</td>
+                    <td>
+                      <StatusBadge status={u.status} />
+                      {u.status === "rejected" && u.rejectionReason && (
+                        <div className="rejection-feedback">
+                          <div className="rejection-feedback-reason">
+                            {u.rejectionReason.replace("_", " ")}
+                          </div>
+                          {u.rejectionNote && (
+                            <div className="rejection-feedback-note">{u.rejectionNote}</div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </DashboardCard>
     </>
   );
