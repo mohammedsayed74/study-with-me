@@ -8,6 +8,8 @@ function AddCourse() {
     const [courseCode, setCourseCode] = useState("");
     const [description, setDescription] = useState("");
     const [error, setError] = useState("");
+    const [department, setDepartment] = useState('Computer Science');
+    const [year, setYear] = useState(1);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -19,7 +21,7 @@ function AddCourse() {
 
             await axios.post(
                 "/api/courses",
-                { title, courseCode, description },
+                { title, courseCode, description, department, year },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -56,6 +58,33 @@ function AddCourse() {
                             required
                             placeholder="E.g. CS303"
                         />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Department</label>
+                        <select
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                            required
+                        >
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Statistics">Statistics</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Academic Year</label>
+                        <select
+                            value={year}
+                            onChange={(e) => setYear(Number(e.target.value))}
+                            required
+                        >
+                            <option value={1}>Year 1</option>
+                            <option value={2}>Year 2</option>
+                            <option value={3}>Year 3</option>
+                            <option value={4}>Year 4</option>
+                        </select>
                     </div>
 
                     <div className="form-group">

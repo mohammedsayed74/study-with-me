@@ -1,4 +1,5 @@
-const Material = require('../models/Material');
+const Material = require("../models/Material");
+const Course = require("../models/Course");
 const cloudinary = require(`cloudinary`).v2;
 
 const uploadMaterial = async (req, res) => {
@@ -19,6 +20,7 @@ const uploadMaterial = async (req, res) => {
 
     const pdfUrl = req.file.secure_url || req.file.path;
     const status = req.user.role === `teacher` ? `approved` : `pending`;
+    const uploaderRole = req.user.role;
 
     const material = await Material.create({
       title,
@@ -26,12 +28,16 @@ const uploadMaterial = async (req, res) => {
       pdfUrl,
       pdfPublicId: req.file.public_id || req.file.filename,
       uploadedBy: req.user._id,
-      status: status
+      uploaderRole,
+      status: status,
     });
 
     res.status(201).json({
       success: true,
-      message: status === `pending` ? `material uploaded successfully ! waiting for TA to approve !` : `material uploaded successfully !`,
+      message:
+        status === `pending`
+          ? `material uploaded successfully ! waiting for TA to approve !`
+          : `material uploaded successfully !`,
       data: material,
     });
   } catch (error) {
@@ -42,17 +48,35 @@ const uploadMaterial = async (req, res) => {
 const getApprovedMaterials = async (req, res) => {
   try {
     const { courseCode } = req.params;
+    const { page = 1, limit = 10 } = req.query;
 
-    const materials = await Material.find({
+    const currentPage = Math.max(Number(page), 1);
+    const limitNum = Number(limit);
+    const skip = (currentPage - 1) * limitNum;
+
+    const query = {
       courseCode: courseCode.toUpperCase(),
       status: `approved`,
-    })
-      .sort({ createdAt: -1 })
+    };
+
+    const materials = await Material.find(query)
+      .sort({ uploaderRole: -1 , createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
       .populate(`uploadedBy`, `name`);
+
+    const totalMaterials = await Material.countDocuments(query);
 
     res
       .status(200)
-      .json({ success: true, count: materials.length, data: materials });
+      .json({ 
+        success: true, 
+        count: materials.length, 
+        totalMaterials,
+        totalPages: Math.ceil(totalMaterials / limitNum) || 1,
+        currentPage,
+        data: materials 
+      });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -141,7 +165,9 @@ const rateMaterial = async (req, res) => {
       return res.status(400).json({ message: `Material not found` });
     }
 
-    const ratingIndex = material.ratings.findIndex((rating) => rating.user.toString() === userId.toString());
+    const ratingIndex = material.ratings.findIndex(
+      (rating) => rating.user.toString() === userId.toString(),
+    );
 
     if (!~ratingIndex) {
       material.ratings.push({ user: userId, score: +score });
@@ -150,8 +176,12 @@ const rateMaterial = async (req, res) => {
     }
 
     material.totalRatings = material.ratings.length;
-    const totalScore = material.ratings.reduce((ans, rating) => ans + rating.score, 0);
-    material.averageRating = Math.round((totalScore / material.totalRatings) * 10) / 10;
+    const totalScore = material.ratings.reduce(
+      (ans, rating) => ans + rating.score,
+      0,
+    );
+    material.averageRating =
+      Math.round((totalScore / material.totalRatings) * 10) / 10;
 
     await material.save();
 
@@ -160,11 +190,120 @@ const rateMaterial = async (req, res) => {
       message: `material rated successfully !`,
       data: material,
     });
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
+
+const searchMaterials = async (req, res) => {
+  try {
+    const { keyword, department, year, sort, page = 1, limit = 10, courseCode } = req.query;
+
+    let applyCourseFilter = false;
+    let courseFilters = {};
+
+    if (courseCode) {
+      courseFilters.courseCode = courseCode.toUpperCase();
+      applyCourseFilter = true;
+    } else {
+      if (department) {
+        courseFilters.department = department;
+        applyCourseFilter = true;
+      }
+
+      const targetYear = year || (req.user?.role === 'student' ? req.user.year : null);
+
+      if (targetYear) {
+        courseFilters.year = Number(targetYear);
+        applyCourseFilter = true;
+      }
+
+      if (year) {
+        courseFilters.year = Number(year);
+        applyCourseFilter = true;
+      }
+    }
+
+    let allowedCourseCodes = [];
+
+    if (applyCourseFilter) {
+      const matchingCourses =
+        await Course.find(courseFilters).select("courseCode");
+
+      if (matchingCourses.length === 0) {
+        return res.status(200).json({
+          success: true,
+          count: 0,
+          totalPages: 0,
+          currentPage: Number(page),
+          data: [],
+        });
+      }
+
+      allowedCourseCodes = matchingCourses.map((c) => c.courseCode);
+    }
+
+    let materialQuery = { status: "approved" };
+
+    if (applyCourseFilter) {
+      materialQuery.courseCode = { $in: allowedCourseCodes };
+    }
+
+    let keywordCourseCodes = [];
+
+    if (keyword) {
+      const keywordCourses = await Course.find({
+        $or: [
+          { description: { $regex: keyword, $options: "i" } },
+          { courseCode: { $regex: keyword, $options: "i" } },
+        ],
+      }).select("courseCode");
+
+      keywordCourseCodes = keywordCourses.map((c) => c.courseCode);
+    }
+
+    if (keyword) {
+      materialQuery.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { courseCode: { $regex: keyword, $options: "i" } },
+        { courseCode: { $in: keywordCourseCodes } },
+      ];
+    }
+
+    let sortOptions = { uploaderRole:-1 , createdAt: -1 };
+
+    if (sort === "highestRated") {
+      sortOptions = { averageRating: -1, totalRatings: -1 };
+    } else if (sort === "mostRated") {
+      sortOptions = { totalRatings: -1, averageRating: -1 };
+    } else if (sort === "oldest") {
+      sortOptions = { createdAt: 1 };
+    }
+
+    const currentPage = Math.max(Number(page), 1);
+    const limitNum = Number(limit);
+    const skip = (currentPage - 1) * limitNum;
+
+    const materials = await Material.find(materialQuery)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNum)
+      .populate("uploadedBy", "name");
+
+    const totalMaterials = await Material.countDocuments(materialQuery);
+
+    res.status(200).json({
+      success: true,
+      count: materials.length,
+      totalMaterials,
+      totalPages: Math.ceil(totalMaterials / limitNum),
+      currentPage,
+      data: materials,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
   uploadMaterial,
@@ -172,5 +311,6 @@ module.exports = {
   getPendingMaterials,
   approveMaterial,
   deleteMaterial,
-  rateMaterial
+  rateMaterial,
+  searchMaterials
 };

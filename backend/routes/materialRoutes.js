@@ -5,7 +5,8 @@ const {
   getPendingMaterials,
   approveMaterial,
   deleteMaterial,
-  rateMaterial
+  rateMaterial,
+  searchMaterials
 } = require("../controllers/materialControllers");
 
 
@@ -14,7 +15,7 @@ const upload = require("../middleware/uploadMiddleware");
 
 const router = express.Router();
 
-
+router.get('/search', requireAuth,searchMaterials);
 router.get("/:courseCode/pending", requireAuth, getPendingMaterials);
 router.get("/:courseCode", requireAuth, getApprovedMaterials);
 

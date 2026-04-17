@@ -39,13 +39,14 @@ const loginUser = async (req, res) => {
       token: token,
     });
   } catch (error) {
-    res.status(500).json({ error: `something went wrong` });
+    console.error("Login Error:", error);
+    res.status(500).json({ error: error.message || `something went wrong` });
   }
 };
 
 const signUpUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, year } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: `All fields are required` });
@@ -75,7 +76,7 @@ const signUpUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ name, email, hashedPassword, role });
+    const user = await User.create({ name, email, hashedPassword, role, academicYear: role === 'student' ? Number(year) : undefined });
 
     const token = jwt.sign(
       { _id: user._id, role: user.role },
@@ -94,11 +95,10 @@ const signUpUser = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
-  console.log("Profile route hit for user:", req.user?._id);
   try {
     const user = await User.findById(req.user._id).select('-hashedPassword');
 
-        if (!user) {
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
@@ -129,7 +129,7 @@ const resetPassword = async (req, res) => {
     }
 
     if (newPassword.length < 8 || newPassword.includes(' ') || newPassword.trim() !== newPassword) {
-        return res.status(400).json({ message: 'Invalid new password format' });
+      return res.status(400).json({ message: 'Invalid new password format' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

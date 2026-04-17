@@ -24,6 +24,7 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [year, setYear] = useState(1);
 
   const validateName = (name) => name.trim().length >= 3;
 
@@ -67,9 +68,9 @@ function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/users/signUp", formData);
+      const res = await axios.post("/api/users/signUp", { ...formData, year });
       localStorage.setItem("token", res.data.token);
-      navigate("/home", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setErrors({ api: err.response?.data?.message || "Error signing up" });
     }
@@ -185,6 +186,26 @@ function Signup() {
             </span>
           </div>
           {errors.role && <p className="auth-error">{errors.role}</p>}
+
+          {formData.role === "student" && (
+            <div className="auth-input-group">
+              <span className="material-symbols-outlined input-icon">calendar_today</span>
+              <select
+                name="year"
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value))}
+                required
+              >
+                <option value={1}>Year 1</option>
+                <option value={2}>Year 2</option>
+                <option value={3}>Year 3</option>
+                <option value={4}>Year 4</option>
+              </select>
+              <span className="material-symbols-outlined input-icon-right-inert">
+                expand_more
+              </span>
+            </div>
+          )}
 
           <button className="auth-submit" type="submit" disabled={loading}>
             {loading ? "Creating..." : "Register"}

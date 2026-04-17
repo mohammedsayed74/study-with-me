@@ -8,7 +8,10 @@ import UserProfile from "./pages/UserProfile";
 import ResetPassword from "./pages/ResetPassword";
 import CourseMaterials from "./pages/CourseMaterials";
 import UploadMaterialPage from "./pages/UploadMaterialPage";
-
+import Dashboard from "./pages/Dashboard";
+import QuestionBank from "./pages/QuestionBank";
+import ChapterLevels from "./pages/ChapterLevels";
+import QuizArea from "./pages/QuizArea";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -17,7 +20,7 @@ function ProtectedRoute({ children }) {
 
 function RootRedirect() {
   const token = localStorage.getItem("token");
-  return <Navigate to={token ? "/home" : "/login"} replace />;
+  return <Navigate to={token ? "/dashboard" : "/login"} replace />;
 }
 
 function App() {
@@ -27,6 +30,14 @@ function App() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/home"
           element={
@@ -87,6 +98,28 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+
+        <Route
+  path="/course/:courseCode/question-bank"
+  element={
+    <ProtectedRoute>
+      <QuestionBank />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+<Route
+  path="/course/:courseCode/questions/:chapter"
+  element={<ProtectedRoute><ChapterLevels /></ProtectedRoute>}
+/>
+
+<Route
+  path="/course/:courseCode/questions/:chapter/:level"
+  element={<ProtectedRoute><QuizArea /></ProtectedRoute>}
+/>
 
       </Routes>
     </BrowserRouter>
