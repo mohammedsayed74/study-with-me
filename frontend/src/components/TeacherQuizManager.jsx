@@ -120,10 +120,6 @@ function TeacherQuizManager({ courseCode, chapter, level }) {
           {courseCode} - Chapter {chapter.replace("chapter-", "")} ({level})
         </h2>
         <div className="teacher-actions">
-          <Link to={`/course/${courseCode}/questions/${chapter}`} className="back-link" style={{ marginRight: '16px' }}>
-             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
-             Back
-          </Link>
           <button className="btn-primary" onClick={openAddModal}>
             + Add Question
           </button>

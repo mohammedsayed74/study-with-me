@@ -204,9 +204,9 @@ function CourseMaterials() {
       <div className="materials-blob-1"></div>
       <div className="materials-blob-2"></div>
 
-      <button className="back-btn" onClick={() => navigate("/home")}>
+      <button className="back-btn" onClick={() => navigate("/home", { replace: true })}>
         <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
-        Back
+        Back to Courses
       </button>
 
       <div className="materials-header">

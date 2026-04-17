@@ -6,14 +6,35 @@ function StudentQuiz({ courseCode, chapter, level }) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState("");
-  const [verificationResult, setVerificationResult] = useState(null); // { isCorrect: boolean, explanation: string, correctAnswer: string }
   const [isVerifying, setIsVerifying] = useState(false);
-  
-  const [correctCount, setCorrectCount] = useState(0);
-  const [incorrectCount, setIncorrectCount] = useState(0);
-  const [quizFinished, setQuizFinished] = useState(false);
+
+  const quizStateKey = `quiz_${courseCode}_${chapter}_${level}`;
+
+  const loadInitialState = () => {
+    const saved = localStorage.getItem(quizStateKey);
+    if (saved) return JSON.parse(saved);
+    return {
+      answers: {}, // index -> { selectedOption, verificationResult, isCorrect }
+      currentIndex: 0,
+      quizFinished: false
+    };
+  };
+
+  const [quizState, setQuizState] = useState(loadInitialState);
+
+  useEffect(() => {
+    localStorage.setItem(quizStateKey, JSON.stringify(quizState));
+  }, [quizState, quizStateKey]);
+
+  const { answers, currentIndex, quizFinished } = quizState;
+
+  // Calculate scores dynamically from the answers object
+  const correctCount = Object.values(answers).filter(a => a.isCorrect).length;
+  const incorrectCount = Object.values(answers).filter(a => a.selectedOption && !a.isCorrect).length;
+
+  const currentAnswer = answers[currentIndex] || {};
+  const selectedOption = currentAnswer.selectedOption || "";
+  const verificationResult = currentAnswer.verificationResult || null;
 
   const getQuestions = async () => {
     try {
@@ -36,8 +57,22 @@ function StudentQuiz({ courseCode, chapter, level }) {
     getQuestions();
   }, [courseCode, chapter, level]);
 
+  const handleOptionSelect = (opt) => {
+    if (verificationResult) return;
+    setQuizState(prev => ({
+      ...prev,
+      answers: {
+        ...prev.answers,
+        [prev.currentIndex]: {
+          ...prev.answers[prev.currentIndex],
+          selectedOption: opt
+        }
+      }
+    }));
+  };
+
   const verifyAnswer = async () => {
-    if (!selectedOption) return;
+    if (!selectedOption || isVerifying || verificationResult) return;
     setIsVerifying(true);
     
     try {
@@ -51,13 +86,20 @@ function StudentQuiz({ courseCode, chapter, level }) {
       );
       
       const { isCorrect, explanation, correctAnswer } = res.data;
-      setVerificationResult({ isCorrect, explanation, correctAnswer });
       
-      if (isCorrect) {
-        setCorrectCount((prev) => prev + 1);
-      } else {
-        setIncorrectCount((prev) => prev + 1);
-      }
+      setQuizState(prev => {
+        return {
+          ...prev,
+          answers: {
+            ...prev.answers,
+            [prev.currentIndex]: {
+              ...prev.answers[prev.currentIndex],
+              verificationResult: { isCorrect, explanation, correctAnswer },
+              isCorrect
+            }
+          }
+        };
+      });
       
     } catch (err) {
       console.error(err);
@@ -68,13 +110,28 @@ function StudentQuiz({ courseCode, chapter, level }) {
   };
 
   const handleNext = () => {
-    setSelectedOption("");
-    setVerificationResult(null);
     if (currentIndex + 1 < questions.length) {
-      setCurrentIndex((prev) => prev + 1);
+      setQuizState(prev => ({ ...prev, currentIndex: prev.currentIndex + 1 }));
     } else {
-      setQuizFinished(true);
+      setQuizState(prev => ({ ...prev, quizFinished: true }));
     }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setQuizState(prev => ({ ...prev, currentIndex: prev.currentIndex - 1 }));
+    }
+  };
+
+  // Reset quiz logic
+  const handleResetQuiz = () => {
+    const newState = {
+      answers: {},
+      currentIndex: 0,
+      quizFinished: false
+    };
+    setQuizState(newState);
+    localStorage.setItem(quizStateKey, JSON.stringify(newState));
   };
 
   if (loading) return <div className="quiz-container">Loading...</div>;
@@ -83,10 +140,6 @@ function StudentQuiz({ courseCode, chapter, level }) {
     return (
       <div className="quiz-container">
         <h2>No questions available for this level yet!</h2>
-        <Link to={`/course/${courseCode}/questions/${chapter}`} className="back-link">
-           <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
-           Back to Levels
-        </Link>
       </div>
     );
   }
@@ -102,10 +155,13 @@ function StudentQuiz({ courseCode, chapter, level }) {
           <p style={{ fontSize: "18px", color: "#7f8c8d" }}>
             You answered <strong>{correctCount}</strong> correctly out of <strong>{total}</strong> questions.
           </p>
-          <div style={{ marginTop: "30px", display: "flex", gap: "16px", justifyContent: "center" }}>
-            <Link to={`/course/${courseCode}/questions/${chapter}`} className="btn-primary" style={{ textDecoration: "none" }}>
-              Back to Levels
-            </Link>
+          <div style={{ marginTop: "30px", display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
+            <button onClick={() => setQuizState(prev => ({ ...prev, quizFinished: false, currentIndex: 0 }))} className="btn-primary" style={{ background: "#3498db" }}>
+              Review Answers
+            </button>
+            <button onClick={handleResetQuiz} className="btn-primary" style={{ background: "#e74c3c" }}>
+              Retake Quiz
+            </button>
           </div>
         </div>
       </div>
@@ -118,14 +174,18 @@ function StudentQuiz({ courseCode, chapter, level }) {
   return (
     <div className="quiz-container">
       <div className="quiz-header">
-        <Link to={`/course/${courseCode}/questions/${chapter}`} className="back-link">
-           <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
-           Back
-        </Link>
+        {currentIndex > 0 ? (
+          <button onClick={handlePrevious} className="back-link" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+             <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_back</span>
+             Previous
+          </button>
+        ) : (
+          <div style={{ width: "60px" }}></div>
+        )}
         <h2 className="quiz-title">
           Chapter {chapter.replace("chapter-", "")} Quiz - <span style={{textTransform: 'capitalize'}}>{level}</span>
         </h2>
-        <div style={{ width: "60px" }}></div> {/* Placeholder for balance */}
+        <div style={{ width: "60px" }}></div>
       </div>
 
       <div className="quiz-layout">
@@ -139,7 +199,7 @@ function StudentQuiz({ courseCode, chapter, level }) {
               <div
                 key={i}
                 className={`option-item ${selectedOption === opt ? "selected" : ""}`}
-                onClick={() => !verificationResult && setSelectedOption(opt)}
+                onClick={() => handleOptionSelect(opt)}
                 style={{
                   pointerEvents: verificationResult ? "none" : "auto",
                   opacity: verificationResult && selectedOption !== opt && verificationResult.correctAnswer !== opt ? 0.6 : 1
@@ -202,8 +262,18 @@ function StudentQuiz({ courseCode, chapter, level }) {
 
         <button 
           className="next-btn"
-          onClick={handleNext}
-          disabled={!verificationResult}
+          onClick={() => {
+            if (!verificationResult) {
+              if (!selectedOption) {
+                alert("Please select an answer first!");
+              } else {
+                verifyAnswer();
+              }
+            } else {
+              handleNext();
+            }
+          }}
+          disabled={isVerifying}
         >
           {currentIndex + 1 === totalQ ? "View Score" : "Next Question"}
         </button>
@@ -213,3 +283,4 @@ function StudentQuiz({ courseCode, chapter, level }) {
 }
 
 export default StudentQuiz;
+

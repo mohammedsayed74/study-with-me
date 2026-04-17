@@ -35,10 +35,6 @@ function ChapterLevels() {
 
                 </div>
 
-                <Link to={`/course/${courseCode}/question-bank`} className="back-link">
-                    Back
-                </Link>
-
             </div>
         </div>
     );
