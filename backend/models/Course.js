@@ -22,6 +22,16 @@ const courseSchema = new mongoose.Schema(
       ref: `User`,
       required: true,
     },
+    department:{
+      type:String,
+      enum:[`Computer Science`,`Mathematics`,`Statistics`],
+      required:true
+    },
+    year:{
+      type:Number,
+      enum:[1,2,3,4],
+      required:true
+    }
   },
   { timestamps: true },
 );

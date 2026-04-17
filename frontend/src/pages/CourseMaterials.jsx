@@ -3,6 +3,7 @@ import { useParams, Navigate, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import "./materials.css";
+import "./home.css";
 import StarRating from "../components/StarRating";
 
 function CourseMaterials() {
@@ -14,6 +15,12 @@ function CourseMaterials() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("approved"); 
+  
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchSort, setSearchSort] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
 
 
   const token = localStorage.getItem("token");
@@ -39,9 +46,18 @@ function CourseMaterials() {
 
     try {
       const headers = { Authorization: `Bearer ${token}` };
+      
+      const searchParams = new URLSearchParams({
+        courseCode: courseCode,
+        page: currentPage,
+        limit: 10
+      });
+      if (searchKeyword) searchParams.append("keyword", searchKeyword);
+      if (searchSort) searchParams.append("sort", searchSort);
 
-      const approvedRes = await axios.get(`/api/materials/${courseCode}`, { headers });
+      const approvedRes = await axios.get(`/api/materials/search?${searchParams.toString()}`, { headers });
       setMaterials(approvedRes.data.data || []);
+      setTotalPages(approvedRes.data.totalPages || 1);
 
       if (isTeacher) {
         const pendingRes = await axios.get(`/api/materials/${courseCode}/pending`, { headers });
@@ -58,8 +74,15 @@ function CourseMaterials() {
     if (courseCode) {
       fetchMaterials();
     }
+  }, [courseCode, token, isTeacher, currentPage, fetchTrigger]);
 
-  }, [courseCode, token, isTeacher]);
+  const executeSearch = () => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      setFetchTrigger(prev => prev + 1);
+    }
+  };
 
   const handleApprove = async (id) => {
     try {
@@ -187,8 +210,22 @@ function CourseMaterials() {
       </button>
 
       <div className="materials-header">
+
         <h1>{courseCode} Materials</h1>
-        <p>Course resources</p>
+        <p> course resources</p>
+        <Link
+  to={`/course/${courseCode}/question-bank`}
+  className="material-btn btn-primary"
+  style={{
+    display: "inline-flex",
+    marginTop: "1rem",
+    padding: "0.6rem 1.5rem",
+    width: "auto"
+  }}
+>
+  Question Bank
+</Link>
+        <br/>
 
         <Link to={`/course/${courseCode}/upload`} className="material-btn btn-primary" style={{ display: 'inline-flex', marginTop: '1rem', padding: '0.6rem 1.5rem', width: 'auto' }}>
           <span className="material-symbols-outlined">add</span>
@@ -215,6 +252,45 @@ function CourseMaterials() {
         </div>
       )}
 
+      {(!isTeacher || activeTab === "approved") && (
+        <div className="home-search-container" style={{ marginTop: '2rem' }}>
+          <input 
+            type="text" 
+            placeholder="Search material title..." 
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && executeSearch()}
+          />
+          <select value={searchSort} onChange={(e) => {
+            setSearchSort(e.target.value);
+            executeSearch();
+          }}>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="mostRated">Most Rated</option>
+            <option value="highestRated">Highest Rated</option>
+          </select>
+          <button className="search-btn" onClick={executeSearch}>
+            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>search</span>
+            Search
+          </button>
+          {(searchKeyword || searchSort !== "newest") && (
+            <button className="clear-search-btn" onClick={() => { 
+                setSearchKeyword(""); 
+                setSearchSort("newest"); 
+                if (currentPage !== 1) {
+                    setCurrentPage(1);
+                } else {
+                    setFetchTrigger(prev => prev + 1);
+                }
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <div className="materials-loading">
           <div className="spinner"></div>
@@ -222,8 +298,34 @@ function CourseMaterials() {
         </div>
       ) : (
         <>
-          {(!isTeacher || activeTab === "approved") && renderMaterialsGrid(materials, false)}
-          {(isTeacher && activeTab === "pending") && renderMaterialsGrid(pendingMaterials, true)}
+          {(!isTeacher || activeTab === "approved") && (
+             <>
+               {renderMaterialsGrid(materials, false)}
+               <div className="pagination">
+                 <button 
+                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                   disabled={currentPage === 1}
+                   className="pagination-btn"
+                 >
+                   Previous
+                 </button>
+                 <span className="pagination-info">
+                   Page {currentPage} of {totalPages}
+                 </span>
+                 <button 
+                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                   disabled={currentPage >= totalPages}
+                   className="pagination-btn"
+                 >
+                   Next
+                 </button>
+               </div>
+             </>
+          )}
+          {(isTeacher && activeTab === "pending") && renderMaterialsGrid(
+            pendingMaterials.filter(m => !searchKeyword || m.title.toLowerCase().includes(searchKeyword.toLowerCase())),
+            true
+          )}
         </>
       )}
     </div>
