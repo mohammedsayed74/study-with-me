@@ -25,11 +25,19 @@ const materialSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: [`pending`, `approved`, `rejected`],
-      defualt: `pending`,
+      default: `pending`,
     },
     pdfPublicId: {
       type: String,
       required: true,
+    },
+    rejectionReason: {
+      type: String,
+      enum: [`duplicate`, `incomplete`, `not_appropriate`, `other`],
+    },
+    rejectionNote: {
+      type: String,
+      trim: true,
     },
     ratings: [
       {
@@ -43,6 +51,10 @@ const materialSchema = new mongoose.Schema(
           required: true,
           min: 1,
           max: 5,
+        },
+        ratedAt: {
+          type: Date,
+          default: Date.now,
         },
       },
     ],

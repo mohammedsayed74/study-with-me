@@ -69,7 +69,7 @@ function Signup() {
     try {
       const res = await axios.post("/api/users/signUp", formData);
       localStorage.setItem("token", res.data.token);
-      navigate("/home", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setErrors({ api: err.response?.data?.message || "Error signing up" });
     }

@@ -87,6 +87,14 @@ function Home() {
               Add Course
             </button>
           )}
+
+          <button
+            className="dashboard-btn"
+            onClick={() => navigate("/dashboard")}
+          >
+            <span className="material-symbols-outlined">dashboard</span>
+            Dashboard
+          </button>
           
 <button className="logout-btn"
   onClick={() => navigate("/profile")}

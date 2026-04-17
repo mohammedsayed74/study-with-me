@@ -17,8 +17,8 @@ function Login() {
 
   const token = localStorage.getItem("token");
 
-  if (token) {
-    return <Navigate to="/home" replace />;
+    if (token) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   const validateEmail = (email) =>
@@ -51,7 +51,7 @@ function Login() {
     try {
       const { data } = await axios.post("/api/users/login", formData);
       localStorage.setItem("token", data.token);
-      navigate("/home", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setErrors({ api: err.response?.data?.message || "Login failed" });
     }

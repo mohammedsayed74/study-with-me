@@ -3,6 +3,7 @@ const express = require(`express`);
 const userRoutes = require(`../backend/routes/userRoutes`);
 const courseRoutes = require(`../backend/routes/courseRoutes`);
 const materialRoutes = require("./routes/materialRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const mongoose = require("mongoose");
 const app = express();
 
@@ -20,7 +21,9 @@ mongoose
 app.use(`/api/users`, userRoutes);
 app.use(`/api/courses`, courseRoutes);
 app.use(`/api/materials`, materialRoutes);
+app.use(`/api/dashboard`, dashboardRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`server is running on port ${process.env.PORT}`);
 });
+

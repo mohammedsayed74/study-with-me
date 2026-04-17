@@ -39,7 +39,8 @@ const loginUser = async (req, res) => {
       token: token,
     });
   } catch (error) {
-    res.status(500).json({ error: `something went wrong` });
+    console.error("Login Error:", error);
+    res.status(500).json({ error: error.message || `something went wrong` });
   }
 };
 

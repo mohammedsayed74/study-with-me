@@ -8,6 +8,7 @@ import UserProfile from "./pages/UserProfile";
 import ResetPassword from "./pages/ResetPassword";
 import CourseMaterials from "./pages/CourseMaterials";
 import UploadMaterialPage from "./pages/UploadMaterialPage";
+import Dashboard from "./pages/Dashboard";
 
 
 function ProtectedRoute({ children }) {
@@ -17,7 +18,7 @@ function ProtectedRoute({ children }) {
 
 function RootRedirect() {
   const token = localStorage.getItem("token");
-  return <Navigate to={token ? "/home" : "/login"} replace />;
+  return <Navigate to={token ? "/dashboard" : "/login"} replace />;
 }
 
 function App() {
@@ -27,6 +28,14 @@ function App() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/home"
           element={
