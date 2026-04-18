@@ -3,17 +3,28 @@ import axios from "axios";
 import DashboardCard from "./DashboardCard";
 import StatusBadge from "./StatusBadge";
 
+const AVATAR_COLORS = [
+  "#2b8cee", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444",
+  "#ec4899", "#06b6d4", "#6366f1", "#14b8a6", "#f97316",
+];
+
 function StudentDashboard({ token }) {
   const [ratings, setRatings] = useState([]);
   const [uploads, setUploads] = useState([]);
+  const [topRated, setTopRated] = useState([]);
+  const [contributors, setContributors] = useState([]);
   const [loadingRatings, setLoadingRatings] = useState(true);
   const [loadingUploads, setLoadingUploads] = useState(true);
+  const [loadingTop, setLoadingTop] = useState(true);
+  const [loadingContrib, setLoadingContrib] = useState(true);
 
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
     fetchRatings();
     fetchUploads();
+    fetchTopRated();
+    fetchContributors();
   }, []);
 
   const fetchRatings = async () => {
@@ -38,6 +49,28 @@ function StudentDashboard({ token }) {
     }
   };
 
+  const fetchTopRated = async () => {
+    try {
+      const res = await axios.get("/api/dashboard/doctor/top-rated", { headers });
+      setTopRated(res.data.data || []);
+    } catch (err) {
+      console.error("Failed to load top rated", err);
+    } finally {
+      setLoadingTop(false);
+    }
+  };
+
+  const fetchContributors = async () => {
+    try {
+      const res = await axios.get("/api/dashboard/doctor/top-contributors", { headers });
+      setContributors(res.data.data || []);
+    } catch (err) {
+      console.error("Failed to load contributors", err);
+    } finally {
+      setLoadingContrib(false);
+    }
+  };
+
   const renderStars = (score) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -53,6 +86,27 @@ function StudentDashboard({ token }) {
     return <span className="dash-stars">{stars}</span>;
   };
 
+  const renderStarsWithAvg = (avg) => {
+    const stars = [];
+    const rounded = Math.round(avg);
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span
+          key={i}
+          className={`material-symbols-outlined ${i > rounded ? "star-empty" : ""}`}
+        >
+          star
+        </span>
+      );
+    }
+    return (
+      <>
+        <span className="dash-stars">{stars}</span>
+        <span className="dash-rating-value">{avg}</span>
+      </>
+    );
+  };
+
   const formatDate = (d) => {
     if (!d) return "—";
     return new Date(d).toLocaleDateString("en-US", {
@@ -60,6 +114,13 @@ function StudentDashboard({ token }) {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const getRankClass = (i) => {
+    if (i === 0) return "rank-1";
+    if (i === 1) return "rank-2";
+    if (i === 2) return "rank-3";
+    return "rank-other";
   };
 
   const totalUploads = uploads.length;
@@ -205,6 +266,113 @@ function StudentDashboard({ token }) {
           </div>
         )}
       </DashboardCard>
+
+      {/* ── Two-column grid ── */}
+      <div className="dash-grid-2">
+        {/* Highest Rated Files */}
+        <DashboardCard
+          icon="workspace_premium"
+          title="Highest Rated Files"
+          count={topRated.length}
+          loading={loadingTop}
+        >
+          {topRated.length === 0 ? (
+            <div className="dash-empty">
+              <div className="dash-empty-icon">
+                <span className="material-symbols-outlined">star_border</span>
+              </div>
+              <h4>No rated files yet</h4>
+              <p>Files will appear here once students start rating.</p>
+            </div>
+          ) : (
+            <div className="dash-table-wrap">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Rating</th>
+                    <th>Reviews</th>
+                    <th>Uploader</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topRated.map((m) => (
+                    <tr key={m._id}>
+                      <td>
+                        <div className="dash-table-title">{m.title}</div>
+                        <div className="dash-table-sub">{m.courseCode}</div>
+                      </td>
+                      <td>{renderStarsWithAvg(m.averageRating)}</td>
+                      <td>
+                        <span className="dash-rating-count">{m.totalRatings}</span>
+                      </td>
+                      <td>{m.uploadedBy?.name || "Unknown"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </DashboardCard>
+
+        {/* Most Active Contributors */}
+        <DashboardCard
+          icon="emoji_events"
+          title="Most Active Contributors"
+          count={contributors.length}
+          loading={loadingContrib}
+        >
+          {contributors.length === 0 ? (
+            <div className="dash-empty">
+              <div className="dash-empty-icon">
+                <span className="material-symbols-outlined">person_off</span>
+              </div>
+              <h4>No contributors yet</h4>
+              <p>Users who upload materials will appear here.</p>
+            </div>
+          ) : (
+            <div className="dash-table-wrap">
+              <table className="dash-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>User</th>
+                    <th>Uploads</th>
+                    <th>Approved</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contributors.map((c, i) => (
+                    <tr key={c._id}>
+                      <td>
+                        <span className={`contributor-rank ${getRankClass(i)}`}>
+                          {i + 1}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="contributor-row">
+                          <div
+                            className="contributor-avatar"
+                            style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                          >
+                            {c.name?.charAt(0)?.toUpperCase() || "?"}
+                          </div>
+                          <div className="contributor-info">
+                            <div className="contributor-name">{c.name}</div>
+                            <div className="contributor-role">{c.role}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{c.totalUploads}</td>
+                      <td style={{ fontWeight: 600, color: "#10b981" }}>{c.approvedUploads}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </DashboardCard>
+      </div>
     </>
   );
 }

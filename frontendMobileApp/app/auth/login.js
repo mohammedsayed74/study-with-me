@@ -98,9 +98,20 @@ export default function Login() {
               setLoading(true);
               const result = await loginUser({ email, password });
               await AsyncStorage.setItem("token", result.token);
-              router.replace("/(tabs)/home");
+              await AsyncStorage.setItem(
+                "user_name",
+                result.name || result.user?.name || "",
+              );
+              await AsyncStorage.setItem(
+                "user_role",
+                result.role || result.user?.role || "student",
+              );
+              router.replace("/(tabs)/dashboard");
             } catch (error) {
-              Alert.alert("Login failed", error.message || "Invalid email or password.");
+              Alert.alert(
+                "Login failed",
+                error.message || "Invalid email or password.",
+              );
             } finally {
               setLoading(false);
             }
