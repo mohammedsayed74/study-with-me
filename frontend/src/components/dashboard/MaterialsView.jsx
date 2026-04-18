@@ -35,15 +35,27 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
-      const searchParams = new URLSearchParams({
-        courseCode: courseCode,
-        page: currentPage,
-        limit: 10
-      });
-      if (searchKeyword) searchParams.append("keyword", searchKeyword);
-      if (searchSort) searchParams.append("sort", searchSort);
+      // Use search endpoint if there's a keyword, otherwise use the direct course endpoint
+      let url;
+      if (searchKeyword) {
+        const searchParams = new URLSearchParams({
+          courseCode: courseCode,
+          keyword: searchKeyword,
+          sort: searchSort,
+          page: currentPage,
+          limit: 10
+        });
+        url = `/api/materials/search?${searchParams.toString()}`;
+      } else {
+        const queryParams = new URLSearchParams({
+          page: currentPage,
+          limit: 10,
+          sort: searchSort
+        });
+        url = `/api/materials/${courseCode}?${queryParams.toString()}`;
+      }
 
-      const approvedRes = await axios.get(`/api/materials/search?${searchParams.toString()}`, { headers });
+      const approvedRes = await axios.get(url, { headers });
       setMaterials(approvedRes.data.data || []);
       setTotalPages(approvedRes.data.totalPages || 1);
 
@@ -52,7 +64,8 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
         setPendingMaterials(pendingRes.data.data || []);
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load materials.");
+      setError(err.response?.data?.message || "Failed to load materials. Please check your connection.");
+      console.error("Fetch materials error:", err);
     } finally {
       setLoading(false);
     }
