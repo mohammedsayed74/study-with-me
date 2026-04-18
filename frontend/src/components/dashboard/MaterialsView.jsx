@@ -329,7 +329,7 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
             <select 
               value={searchSort} 
               onChange={(e) => { setSearchSort(e.target.value); executeSearch(); }}
-              style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--dash-border)', backgroundColor: '#fff', outline: 'none', cursor: 'pointer' }}
+              style={{ padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--dash-border)', backgroundColor: '#fff', color: 'var(--dash-text)', outline: 'none', cursor: 'pointer' }}
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>

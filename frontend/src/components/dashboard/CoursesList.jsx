@@ -49,7 +49,7 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse }) {
             <select 
               value={searchDepartment} 
               onChange={(e) => setSearchDepartment(e.target.value)}
-              style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--dash-border)', backgroundColor: '#fff', fontSize: '0.9rem', outline: 'none', cursor: 'pointer' }}
+              style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--dash-border)', backgroundColor: '#fff', color: 'var(--dash-text)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
             >
               <option value="">All Departments</option>
               <option value="Computer Science">Computer Science</option>
@@ -59,7 +59,7 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse }) {
             <select 
               value={searchYear} 
               onChange={(e) => setSearchYear(e.target.value)}
-              style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--dash-border)', backgroundColor: '#fff', fontSize: '0.9rem', outline: 'none', cursor: 'pointer' }}
+              style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--dash-border)', backgroundColor: '#fff', color: 'var(--dash-text)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer', fontWeight: 600 }}
             >
               <option value="">All Years</option>
               <option value="1">Year 1</option>
