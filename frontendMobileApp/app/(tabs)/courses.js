@@ -36,7 +36,7 @@ export default function CoursesScreen() {
         }
       };
       fetchCourses();
-    }, [])
+    }, []),
   );
   const handleClear = () => {
     setSearch("");
@@ -77,14 +77,14 @@ export default function CoursesScreen() {
             try {
               await deleteCourse(courseCode);
               setCourses((prev) =>
-                prev.filter((c) => c.courseCode !== courseCode)
+                prev.filter((c) => c.courseCode !== courseCode),
               );
             } catch (err) {
               Alert.alert("Error", err.message || "Failed to delete course.");
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -144,18 +144,17 @@ export default function CoursesScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.pageTitle}>My Courses</Text>
-      <View style={{ flexDirection: "row"}}>
+      <View style={{ flexDirection: "row" }}>
         <View style={styles.searchContainer}>
-        <Feather name="search" size={18} color="#999" />
+          <Feather name="search" size={18} color="#999" />
 
-        <TextInput
-          placeholder="Course name or code"
-          value={search}
-          onChangeText={setSearch}
-          style={styles.searchInput}
-        />
-        
-      </View>
+          <TextInput
+            placeholder="Course name or code"
+            value={search}
+            onChangeText={setSearch}
+            style={styles.searchInput}
+          />
+        </View>
         {(search || department || year) && (
           <TouchableOpacity style={styles.clearBtn} onPress={handleClear}>
             <Feather name="x" size={18} color="red" />
@@ -164,7 +163,6 @@ export default function CoursesScreen() {
         )}
       </View>
 
-      
       <View style={styles.filtersContainer}>
         <View style={{ flex: 0.48 }}>
           <RNPickerSelect
@@ -371,8 +369,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#eddada",
     paddingVertical: 12,
     borderRadius: 25,
-    borderColor:"red",
-    borderWidth:1,
+    borderColor: "red",
+    borderWidth: 1,
     marginTop: 10,
     gap: 6,
   },
