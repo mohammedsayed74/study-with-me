@@ -104,130 +104,132 @@ function Signup() {
 
         {/* Right Panel: Form */}
         <div className="auth-form-panel">
-          <div className="auth-header">
-            <h2>Create Account</h2>
-            <p>Fill in your details to get started</p>
-          </div>
-
-          {errors.api && (
-            <div className="api-error-alert">
-              <span className="material-symbols-outlined">error</span>
-              {errors.api}
+          <div className="auth-form-content">
+            <div className="auth-header">
+              <h2>Create Account</h2>
+              <p>Fill in your details to get started</p>
             </div>
-          )}
 
-          <form className="auth-form" onSubmit={handleSignup} noValidate style={{gap: '16px'}}>
-            
-            <div className="auth-field-group">
-              <label className="auth-label">Full Name</label>
-              <div className="auth-input-wrapper">
-                <span className="material-symbols-outlined input-icon">person</span>
-                <input
-                  name="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
+            {errors.api && (
+              <div className="api-error-alert">
+                <span className="material-symbols-outlined">error</span>
+                {errors.api}
               </div>
-              {errors.name && <div className="auth-error-msg">{errors.name}</div>}
-            </div>
+            )}
 
-            <div className="auth-field-group">
-              <label className="auth-label">Email Address</label>
-              <div className="auth-input-wrapper">
-                <span className="material-symbols-outlined input-icon">mail</span>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="name@university.edu"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              {errors.email && <div className="auth-error-msg">{errors.email}</div>}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <form className="auth-form" onSubmit={handleSignup} noValidate style={{gap: '16px'}}>
+              
               <div className="auth-field-group">
-                <label className="auth-label">Password</label>
+                <label className="auth-label">Full Name</label>
                 <div className="auth-input-wrapper">
-                  <span className="material-symbols-outlined input-icon">lock</span>
+                  <span className="material-symbols-outlined input-icon">person</span>
                   <input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.password}
+                    name="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={formData.name}
                     onChange={handleChange}
                     required
                   />
-                  <span className="material-symbols-outlined toggle-pass" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? "visibility_off" : "visibility"}
-                  </span>
                 </div>
-                {errors.password && <div className="auth-error-msg" style={{fontSize: '0.75rem'}}>{errors.password}</div>}
+                {errors.name && <div className="auth-error-msg">{errors.name}</div>}
               </div>
 
               <div className="auth-field-group">
-                <label className="auth-label">Confirm</label>
+                <label className="auth-label">Email Address</label>
                 <div className="auth-input-wrapper">
-                  <span className="material-symbols-outlined input-icon">lock_reset</span>
+                  <span className="material-symbols-outlined input-icon">mail</span>
                   <input
-                    name="confirmPassword"
-                    type={showConfirm ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
+                    name="email"
+                    type="email"
+                    placeholder="name@university.edu"
+                    value={formData.email}
                     onChange={handleChange}
                     required
                   />
-                  <span className="material-symbols-outlined toggle-pass" onClick={() => setShowConfirm(!showConfirm)}>
-                    {showConfirm ? "visibility_off" : "visibility"}
-                  </span>
                 </div>
-                {errors.confirmPassword && <div className="auth-error-msg" style={{fontSize: '0.75rem'}}>{errors.confirmPassword}</div>}
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div className="auth-field-group">
-                <label className="auth-label">Role</label>
-                <div className="auth-input-wrapper">
-                  <span className="material-symbols-outlined input-icon">badge</span>
-                  <select name="role" value={formData.role} onChange={handleChange} style={{ width: '100%', padding: '14px 16px 14px 48px', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)', borderRadius: '12px', outline: 'none', appearance: 'none' }}>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                  </select>
-                  <span className="material-symbols-outlined" style={{ position: 'absolute', right: '12px', color: '#94a3b8', pointerEvents: 'none' }}>expand_more</span>
-                </div>
+                {errors.email && <div className="auth-error-msg">{errors.email}</div>}
               </div>
 
-              {formData.role === "student" && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="auth-field-group">
-                  <label className="auth-label">Academic Year</label>
+                  <label className="auth-label">Password</label>
                   <div className="auth-input-wrapper">
-                    <span className="material-symbols-outlined input-icon">calendar_month</span>
-                    <select value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ width: '100%', padding: '14px 16px 14px 48px', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)', borderRadius: '12px', outline: 'none', appearance: 'none' }}>
-                      <option value={1}>Year 1</option>
-                      <option value={2}>Year 2</option>
-                      <option value={3}>Year 3</option>
-                      <option value={4}>Year 4</option>
+                    <span className="material-symbols-outlined input-icon">lock</span>
+                    <input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                    />
+                    <span className="material-symbols-outlined toggle-pass" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </div>
+                  {errors.password && <div className="auth-error-msg" style={{fontSize: '0.75rem'}}>{errors.password}</div>}
+                </div>
+
+                <div className="auth-field-group">
+                  <label className="auth-label">Confirm</label>
+                  <div className="auth-input-wrapper">
+                    <span className="material-symbols-outlined input-icon">lock_reset</span>
+                    <input
+                      name="confirmPassword"
+                      type={showConfirm ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                    />
+                    <span className="material-symbols-outlined toggle-pass" onClick={() => setShowConfirm(!showConfirm)}>
+                      {showConfirm ? "visibility_off" : "visibility"}
+                    </span>
+                  </div>
+                  {errors.confirmPassword && <div className="auth-error-msg" style={{fontSize: '0.75rem'}}>{errors.confirmPassword}</div>}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="auth-field-group">
+                  <label className="auth-label">Role</label>
+                  <div className="auth-input-wrapper">
+                    <span className="material-symbols-outlined input-icon">badge</span>
+                    <select name="role" value={formData.role} onChange={handleChange} style={{ width: '100%', padding: '14px 16px 14px 48px', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)', borderRadius: '12px', outline: 'none', appearance: 'none' }}>
+                      <option value="student">Student</option>
+                      <option value="teacher">Teacher</option>
                     </select>
                     <span className="material-symbols-outlined" style={{ position: 'absolute', right: '12px', color: '#94a3b8', pointerEvents: 'none' }}>expand_more</span>
                   </div>
                 </div>
-              )}
+
+                {formData.role === "student" && (
+                  <div className="auth-field-group">
+                    <label className="auth-label">Academic Year</label>
+                    <div className="auth-input-wrapper">
+                      <span className="material-symbols-outlined input-icon">calendar_month</span>
+                      <select value={year} onChange={(e) => setYear(Number(e.target.value))} style={{ width: '100%', padding: '14px 16px 14px 48px', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)', borderRadius: '12px', outline: 'none', appearance: 'none' }}>
+                        <option value={1}>Year 1</option>
+                        <option value={2}>Year 2</option>
+                        <option value={3}>Year 3</option>
+                        <option value={4}>Year 4</option>
+                      </select>
+                      <span className="material-symbols-outlined" style={{ position: 'absolute', right: '12px', color: '#94a3b8', pointerEvents: 'none' }}>expand_more</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button className="auth-btn-primary" type="submit" disabled={loading}>
+                {loading ? "Creating Account..." : "Create Account"}
+                {!loading && <span className="material-symbols-outlined">person_add</span>}
+              </button>
+            </form>
+
+            <div className="auth-switch">
+              Already have an account? <Link to="/login">Sign In</Link>
             </div>
-
-            <button className="auth-btn-primary" type="submit" disabled={loading}>
-              {loading ? "Creating Account..." : "Create Account"}
-              {!loading && <span className="material-symbols-outlined">person_add</span>}
-            </button>
-          </form>
-
-          <div className="auth-switch">
-            Already have an account? <Link to="/login">Sign In</Link>
           </div>
         </div>
 

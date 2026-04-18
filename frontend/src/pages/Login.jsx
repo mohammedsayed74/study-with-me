@@ -85,76 +85,78 @@ function Login() {
 
         {/* Right Panel: Form */}
         <div className="auth-form-panel">
-          <div className="auth-header">
-            <h2>Welcome Back</h2>
-            <p>Please enter your credentials to continue</p>
-          </div>
-
-          {errors.api && (
-            <div className="api-error-alert">
-              <span className="material-symbols-outlined">error</span>
-              {errors.api}
+          <div className="auth-form-content">
+            <div className="auth-header">
+              <h2>Welcome Back</h2>
+              <p>Please enter your credentials to continue</p>
             </div>
-          )}
 
-          <form className="auth-form" onSubmit={handleLogin} noValidate>
-            
-            <div className="auth-field-group">
-              <label className="auth-label">Email Address</label>
-              <div className="auth-input-wrapper">
-                <span className="material-symbols-outlined input-icon">mail</span>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="name@university.edu"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
+            {errors.api && (
+              <div className="api-error-alert">
+                <span className="material-symbols-outlined">error</span>
+                {errors.api}
               </div>
-              {errors.email && (
-                <div className="auth-error-msg">
-                  <span className="material-symbols-outlined" style={{fontSize: "16px"}}>error</span>
-                  {errors.email}
-                </div>
-              )}
-            </div>
+            )}
 
-            <div className="auth-field-group">
-              <label className="auth-label">Password</label>
-              <div className="auth-input-wrapper">
-                <span className="material-symbols-outlined input-icon">lock</span>
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-                <span
-                  className="material-symbols-outlined toggle-pass"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? "visibility_off" : "visibility"}
-                </span>
+            <form className="auth-form" onSubmit={handleLogin} noValidate>
+              
+              <div className="auth-field-group">
+                <label className="auth-label">Email Address</label>
+                <div className="auth-input-wrapper">
+                  <span className="material-symbols-outlined input-icon">mail</span>
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="name@university.edu"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                {errors.email && (
+                  <div className="auth-error-msg">
+                    <span className="material-symbols-outlined" style={{fontSize: "16px"}}>error</span>
+                    {errors.email}
+                  </div>
+                )}
               </div>
-              {errors.password && (
-                <div className="auth-error-msg">
-                  <span className="material-symbols-outlined" style={{fontSize: "16px"}}>error</span>
-                  {errors.password}
+
+              <div className="auth-field-group">
+                <label className="auth-label">Password</label>
+                <div className="auth-input-wrapper">
+                  <span className="material-symbols-outlined input-icon">lock</span>
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                  <span
+                    className="material-symbols-outlined toggle-pass"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
                 </div>
-              )}
+                {errors.password && (
+                  <div className="auth-error-msg">
+                    <span className="material-symbols-outlined" style={{fontSize: "16px"}}>error</span>
+                    {errors.password}
+                  </div>
+                )}
+              </div>
+
+              <button className="auth-btn-primary" type="submit" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In"}
+                {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
+              </button>
+            </form>
+
+            <div className="auth-switch">
+              Don't have an account? <Link to="/signup">Create Account</Link>
             </div>
-
-            <button className="auth-btn-primary" type="submit" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
-              {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
-            </button>
-          </form>
-
-          <div className="auth-switch">
-            Don't have an account? <Link to="/signup">Create Account</Link>
           </div>
         </div>
 
