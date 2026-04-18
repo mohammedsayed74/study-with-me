@@ -17,7 +17,7 @@ function Login() {
 
   const token = localStorage.getItem("token");
 
-    if (token) {
+  if (token) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -37,7 +37,7 @@ function Login() {
     const newErrors = {};
 
     if (!validateEmail(formData.email))
-      newErrors.email = "Invalid email format";
+      newErrors.email = "Please enter a valid email address";
 
     if (!formData.password)
       newErrors.password = "Password is required";
@@ -53,81 +53,111 @@ function Login() {
       localStorage.setItem("token", data.token);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setErrors({ api: err.response?.data?.message || "Login failed" });
+      setErrors({ api: err.response?.data?.message || "Invalid email or password. Please try again." });
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-blob-1"></div>
-      <div className="auth-blob-2"></div>
-
-      <div className="auth-brand">
-        <div className="auth-brand-icon">
-          <span className="material-symbols-outlined" style={{ fontSize: "28px" }}>
-            school
-          </span>
-        </div>
-        <h2>Study With Me</h2>
-      </div>
-
-      <div className="auth-card">
-        <div className="auth-card-header">
-          <h1>Welcome Back</h1>
-          <p>Please enter your details to sign in.</p>
-        </div>
-
-        {errors.api && <p className="auth-error">{errors.api}</p>}
-
-        <form className="auth-form" onSubmit={handleLogin} noValidate>
-          <div className="auth-input-group">
-            <span className="material-symbols-outlined input-icon">mail</span>
-            <input
-              name="email"
-              type="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        
+        {/* Left Panel: Branding & Visual */}
+        <div className="auth-side-panel">
+          <div className="auth-side-brand">
+            <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>school</span>
+            <h2>Study With Me</h2>
           </div>
-          {errors.email && <p className="auth-error">{errors.email}</p>}
-
-          <div className="auth-input-group">
-            <span className="material-symbols-outlined input-icon">lock</span>
-            <input
-              name="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-            <span
-              className="material-symbols-outlined input-icon-right"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "visibility_off" : "visibility"}
-            </span>
+          
+          <div className="auth-side-content">
+            <h1>Elevate Your Learning Journey.</h1>
+            <p>
+              Access a comprehensive archive of materials, practice with smart MCQs, 
+              and track your academic progress in one unified dashboard.
+            </p>
           </div>
-          {errors.password && <p className="auth-error">{errors.password}</p>}
+          
+          <div className="auth-side-footer">
+            © 2026 Material Archive. All rights reserved.
+          </div>
+        </div>
 
-          <button className="auth-submit" type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Log In"}
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
-              login
-            </span>
-          </button>
-        </form>
-      </div>
+        {/* Right Panel: Form */}
+        <div className="auth-form-panel">
+          <div className="auth-header">
+            <h2>Welcome Back</h2>
+            <p>Please enter your credentials to continue</p>
+          </div>
 
-      <div className="auth-footer">
-        Don't have an account?{" "}
-        <Link to="/signup" className="footer-link">
-          Sign Up
-        </Link>
+          {errors.api && (
+            <div className="api-error-alert">
+              <span className="material-symbols-outlined">error</span>
+              {errors.api}
+            </div>
+          )}
+
+          <form className="auth-form" onSubmit={handleLogin} noValidate>
+            
+            <div className="auth-field-group">
+              <label className="auth-label">Email Address</label>
+              <div className="auth-input-wrapper">
+                <span className="material-symbols-outlined input-icon">mail</span>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="name@university.edu"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {errors.email && (
+                <div className="auth-error-msg">
+                  <span className="material-symbols-outlined" style={{fontSize: "16px"}}>error</span>
+                  {errors.email}
+                </div>
+              )}
+            </div>
+
+            <div className="auth-field-group">
+              <label className="auth-label">Password</label>
+              <div className="auth-input-wrapper">
+                <span className="material-symbols-outlined input-icon">lock</span>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <span
+                  className="material-symbols-outlined toggle-pass"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "visibility_off" : "visibility"}
+                </span>
+              </div>
+              {errors.password && (
+                <div className="auth-error-msg">
+                  <span className="material-symbols-outlined" style={{fontSize: "16px"}}>error</span>
+                  {errors.password}
+                </div>
+              )}
+            </div>
+
+            <button className="auth-btn-primary" type="submit" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
+              {!loading && <span className="material-symbols-outlined">arrow_forward</span>}
+            </button>
+          </form>
+
+          <div className="auth-switch">
+            Don't have an account? <Link to="/signup">Create Account</Link>
+          </div>
+        </div>
+
       </div>
     </div>
   );

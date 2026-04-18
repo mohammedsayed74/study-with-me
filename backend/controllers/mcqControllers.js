@@ -25,9 +25,19 @@ const createQuestion = async (req, res) => {
             });
         }
 
+        let finalChapter = chapter;
+        if (typeof chapter === 'string') {
+            const match = chapter.match(/\d+/);
+            if (match) {
+                finalChapter = Number(match[0]);
+            } else {
+                finalChapter = Number(chapter);
+            }
+        }
+
         const newQuestion = await Mcq.create({
             courseCode: courseCode.toUpperCase(),
-            chapter: Number(chapter),
+            chapter: isNaN(finalChapter) ? 0 : finalChapter,
             difficulty,
             questionText,
             options,
