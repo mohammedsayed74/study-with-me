@@ -223,6 +223,13 @@ export default function CourseMaterialsScreen() {
           <Text style={styles.pageTitle}>{courseCode}</Text>
           <Text style={styles.pageSubtitle}>Course Materials</Text>
         </View>
+        <TouchableOpacity
+          style={{ backgroundColor: COLORS.navy2, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, flexDirection: "row", alignItems: "center", gap: 6 }}
+          onPress={() => router.push(`/courses/questions/${courseCode}`)}
+        >
+          <Feather name="help-circle" size={16} color={COLORS.white} />
+          <Text style={{ color: COLORS.white, fontSize: 13, fontWeight: "700" }}>Question Bank</Text>
+        </TouchableOpacity>
       </View>
 
       {isTeacher && (
