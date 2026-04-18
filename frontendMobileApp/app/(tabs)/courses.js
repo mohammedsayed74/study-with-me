@@ -6,7 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  TextInput,
 } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
 import { getCourses, deleteCourse } from "../../src/services/coursesService";
 import { Feather } from "@expo/vector-icons";
@@ -17,7 +19,9 @@ import { jwtDecode } from "jwt-decode";
 export default function CoursesScreen() {
   const [courses, setCourses] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
-
+  const [department, setDepartment] = useState(null);
+  const [year, setYear] = useState(null);
+  const [search, setSearch] = useState("");
   useFocusEffect(
     useCallback(() => {
       const fetchCourses = async () => {
@@ -34,6 +38,31 @@ export default function CoursesScreen() {
       fetchCourses();
     }, [])
   );
+  const handleClear = () => {
+    setSearch("");
+    setDepartment(null);
+    setYear(null);
+  };
+  const filteredCourses = courses.filter((course) => {
+    if (search) {
+      const text = search.toLowerCase();
+      const matches =
+        course.title.toLowerCase().includes(text) ||
+        course.courseCode.toLowerCase().includes(text);
+
+      if (!matches) return false;
+    }
+
+    if (department) {
+      if (course.department !== department) return false;
+    }
+
+    if (year) {
+      if (course.year !== year) return false;
+    }
+
+    return true;
+  });
 
   const handleDelete = (courseCode, title) => {
     Alert.alert(
@@ -115,9 +144,63 @@ export default function CoursesScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.pageTitle}>My Courses</Text>
+      <View style={{ flexDirection: "row"}}>
+        <View style={styles.searchContainer}>
+        <Feather name="search" size={18} color="#999" />
 
+        <TextInput
+          placeholder="Course name or code"
+          value={search}
+          onChangeText={setSearch}
+          style={styles.searchInput}
+        />
+        
+      </View>
+        {(search || department || year) && (
+          <TouchableOpacity style={styles.clearBtn} onPress={handleClear}>
+            <Feather name="x" size={18} color="red" />
+            <Text style={styles.clearText}>Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      
+      <View style={styles.filtersContainer}>
+        <View style={{ flex: 0.48 }}>
+          <RNPickerSelect
+            value={department}
+            onValueChange={(value) => setDepartment(value)}
+            placeholder={{ label: "All Departments", value: null }}
+            items={[
+              { label: "Computer Science", value: "Computer Science" },
+              { label: "Mathematics", value: "Mathematics" },
+              { label: "Statistics", value: "Statistics" },
+            ]}
+            style={pickerSelectStyles}
+            useNativeAndroidPickerStyle={false}
+            Icon={() => <Feather name="chevron-down" size={18} />}
+          />
+        </View>
+
+        <View style={{ flex: 0.48 }}>
+          <RNPickerSelect
+            value={year}
+            onValueChange={(value) => setYear(value)}
+            placeholder={{ label: "All Years", value: null }}
+            items={[
+              { label: "Year 1", value: 1 },
+              { label: "Year 2", value: 2 },
+              { label: "Year 3", value: 3 },
+              { label: "Year 4", value: 4 },
+            ]}
+            style={pickerSelectStyles}
+            useNativeAndroidPickerStyle={false}
+            Icon={() => <Feather name="chevron-down" size={18} />}
+          />
+        </View>
+      </View>
       <FlatList
-        data={courses}
+        data={filteredCourses}
         keyExtractor={(item) => item._id}
         renderItem={renderCourse}
         showsVerticalScrollIndicator={false}
@@ -240,4 +323,89 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
+  filtersContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 15,
+  },
+
+  filterBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flex: 0.48,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    backgroundColor: "#f8f8f8",
+  },
+
+  filterText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8f8f8",
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginTop: 10,
+  },
+
+  searchInput: {
+    marginLeft: 10,
+    flex: 1,
+    fontSize: 14,
+  },
+  clearBtn: {
+    flexDirection: "row",
+    width: 80,
+    marginHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#eddada",
+    paddingVertical: 12,
+    borderRadius: 25,
+    borderColor:"red",
+    borderWidth:1,
+    marginTop: 10,
+    gap: 6,
+  },
+
+  clearText: {
+    color: "red",
+    fontWeight: "600",
+    fontSize: 14,
+  },
 });
+const pickerSelectStyles = {
+  inputIOS: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    color: "#000",
+    paddingRight: 30,
+  },
+  inputAndroid: {
+    backgroundColor: "#f8f8f8",
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    color: "#000",
+    paddingRight: 30,
+  },
+  iconContainer: {
+    top: 12,
+    right: 12,
+  },
+};

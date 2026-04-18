@@ -148,8 +148,7 @@ export default function CourseMaterialsScreen() {
               <Feather name="user" size={11} color={COLORS.grey} />{" "}
               {item.uploadedBy?.name || "Unknown"}
             </Text>
-
-            <TouchableOpacity
+            {!isPendingView&&(<TouchableOpacity
               onPress={() => setRatingModal({ visible: true, id: item._id, temp: ratings[item._id] || 0 })}
               style={styles.ratingTrigger}
             >
@@ -161,7 +160,8 @@ export default function CourseMaterialsScreen() {
               <Text style={[styles.ratingLabel, ratings[item._id] && styles.ratingLabelActive]}>
                 {item.averageRating}
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity>)}
+            
           </View>
         </View>
 
