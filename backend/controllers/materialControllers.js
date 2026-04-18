@@ -48,7 +48,7 @@ const uploadMaterial = async (req, res) => {
 const getApprovedMaterials = async (req, res) => {
   try {
     const { courseCode } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, sort } = req.query;
 
     const currentPage = Math.max(Number(page), 1);
     const limitNum = Number(limit);
@@ -59,8 +59,17 @@ const getApprovedMaterials = async (req, res) => {
       status: `approved`,
     };
 
+    let sortOptions = { uploaderRole: -1, createdAt: -1 };
+    if (sort === "highestRated") {
+      sortOptions = { averageRating: -1, totalRatings: -1 };
+    } else if (sort === "mostRated") {
+      sortOptions = { totalRatings: -1, averageRating: -1 };
+    } else if (sort === "oldest") {
+      sortOptions = { createdAt: 1 };
+    }
+
     const materials = await Material.find(query)
-      .sort({ uploaderRole: -1 , createdAt: -1 })
+      .sort(sortOptions)
       .skip(skip)
       .limit(limitNum)
       .populate(`uploadedBy`, `name`);
