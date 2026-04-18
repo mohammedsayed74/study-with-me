@@ -78,6 +78,36 @@ function Signup() {
     setLoading(false);
   };
 
+  const [displayedText, setDisplayedText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const fullText = "Study With Me";
+
+  useEffect(() => {
+    let timer;
+    const type = () => {
+      const currentText = displayedText;
+      if (!isDeleting) {
+        setDisplayedText(fullText.substring(0, currentText.length + 1));
+        if (currentText.length === fullText.length) {
+          timer = setTimeout(() => setIsDeleting(true), 2000); // Pause at end
+        } else {
+          timer = setTimeout(type, 150);
+        }
+      } else {
+        setDisplayedText(fullText.substring(0, currentText.length - 1));
+        if (currentText.length === 0) {
+          setIsDeleting(false);
+          timer = setTimeout(type, 500);
+        } else {
+          timer = setTimeout(type, 50);
+        }
+      }
+    };
+
+    timer = setTimeout(type, 100);
+    return () => clearTimeout(timer);
+  }, [displayedText, isDeleting]);
+
   return (
     <div className="auth-wrapper">
       <div className="auth-container">
@@ -86,7 +116,7 @@ function Signup() {
         <div className="auth-side-panel">
           <div className="auth-side-brand">
             <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>school</span>
-            <h2>Study With Me</h2>
+            <h2>{displayedText}<span className="typing-cursor"></span></h2>
           </div>
           
           <div className="auth-side-content">
