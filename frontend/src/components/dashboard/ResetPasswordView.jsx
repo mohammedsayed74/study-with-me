@@ -1,11 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./materials.css";
 
-const ResetPassword = () => {
-    const navigate = useNavigate();
-    
+const ResetPasswordView = ({ onSuccess, onCancel }) => {
     const [passwords, setPasswords] = useState({
         currentPassword: "",
         newPassword: "",
@@ -28,11 +24,6 @@ const ResetPassword = () => {
 
     const token = localStorage.getItem("token");
 
-    if (!token) {
-        navigate("/login");
-        return null;
-    }
-
     const handleChange = (e) => {
         setPasswords({
             ...passwords,
@@ -42,13 +33,9 @@ const ResetPassword = () => {
 
     const validatePass = (pass) => {
         if (pass.length < 8) return "Password must be at least 8 characters long";
-        
         if (pass.includes(" ")) return "Password cannot contain spaces";
-        
         if (!/[A-Z]/.test(pass)) return "Password must contain at least one uppercase letter";
-        
         if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Password must contain at least one symbol (e.g., @, #)";
-        
         return null;
     };
 
@@ -82,7 +69,7 @@ const ResetPassword = () => {
             setLoading(false);
             
             setTimeout(() => {
-                navigate("/profile");
+                if (onSuccess) onSuccess();
             }, 2000);
         } catch (err) {
             setFeedback({
@@ -94,65 +81,38 @@ const ResetPassword = () => {
     };
 
     return (
-        <div style={{ 
-            minHeight: "100vh", 
-            width: "100vw",
-            position: "absolute",
-            top: 0,
-            left: 0,
-            backgroundColor: "#fff", 
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
-            boxSizing: "border-box",
-            overflowX: "hidden"
-        }}>
-            <div style={{ 
-                height: "140px", 
-                width: "100%", 
-                background: "linear-gradient(to right, #C6DDF0, #EEDFEA, #FEF7E2)",
-                position: "relative" 
-            }}>
-                <button 
-                    onClick={() => navigate("/profile")}
-                    style={{
-                        position: 'absolute',
-                        top: '20px',
-                        left: '20px',
-                        padding: '0.6rem 1.5rem',
-                        backgroundColor: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        fontWeight: '600',
-                        color: '#333',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                    }}
-                >
-                    <span className="material-symbols-outlined">arrow_back</span>
-                    Back
-                </button>
-            </div>
-
-            <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2rem", backgroundColor: "#fff" }}>
-                
+        <div className="reset-password-view" style={{ width: '100%' }}>
+            <div className="dash-card" style={{ padding: '40px', backgroundColor: '#fff', borderRadius: '24px', border: '1px solid var(--dash-border)', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
                 <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
-                    <h2 style={{ margin: 0, fontSize: "1.8rem", color: "#222", fontWeight: "700" }}>Reset Password</h2>
-                    <p style={{ margin: "5px 0 0 0", color: "#888", fontSize: "0.95rem" }}>Update your security credentials below</p>
+                    <div style={{ 
+                        width: '64px', 
+                        height: '64px', 
+                        borderRadius: '20px', 
+                        backgroundColor: 'var(--dash-primary-light)', 
+                        color: 'var(--dash-primary)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        margin: '0 auto 16px'
+                    }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>lock_reset</span>
+                    </div>
+                    <h2 style={{ margin: 0, fontSize: "1.8rem", color: "var(--dash-text)", fontWeight: "800" }}>Reset Password</h2>
+                    <p style={{ margin: "8px 0 0 0", color: "var(--dash-text-muted)", fontSize: "0.95rem" }}>Update your security credentials below</p>
                 </div>
 
                 {feedback.message && (
                     <div style={{
-                        padding: "1rem",
-                        marginBottom: "2rem",
-                        borderRadius: "8px",
-                        backgroundColor: feedback.type === "success" ? "#D1FAE5" : "#FEE2E2",
-                        color: feedback.type === "success" ? "#065F46" : "#991B1B",
+                        padding: "16px",
+                        marginBottom: "24px",
+                        borderRadius: "12px",
+                        backgroundColor: feedback.type === "success" ? "var(--dash-success-bg)" : "var(--dash-danger-bg)",
+                        color: feedback.type === "success" ? "var(--dash-success)" : "var(--dash-danger)",
                         display: "flex",
                         alignItems: "center",
-                        gap: "0.5rem",
-                        fontWeight: "500"
+                        gap: "10px",
+                        fontWeight: "600",
+                        border: `1px solid ${feedback.type === 'success' ? 'var(--dash-success)' : 'var(--dash-danger)'}22`
                     }}>
                         <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
                             {feedback.type === "success" ? "check_circle" : "error"}
@@ -161,10 +121,10 @@ const ResetPassword = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "500px", margin: "0 auto" }}>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     
-                    <div>
-                        <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>Current Password</label>
+                    <div className="form-group">
+                        <label style={{ display: "block", marginBottom: "8px", color: "var(--dash-text-secondary)", fontWeight: "700", fontSize: "0.9rem" }}>Current Password</label>
                         <div style={{ position: "relative" }}>
                             <input
                                 type={showPasswords.current ? "text" : "password"}
@@ -175,46 +135,40 @@ const ResetPassword = () => {
                                 disabled={loading}
                                 style={{
                                     width: "100%",
-                                    padding: "0.9rem 2.5rem 0.9rem 1rem",
-                                    borderRadius: "8px",
-                                    border: "1px solid #F5F5F5",
-                                    backgroundColor: "#FAFAFA",
-                                    color: "#333",
+                                    padding: "14px 45px 14px 16px",
+                                    borderRadius: "14px",
+                                    border: "1px solid var(--dash-border)",
+                                    backgroundColor: "#fcfdfe",
+                                    color: "var(--dash-text)",
                                     fontSize: "0.95rem",
                                     outline: "none",
-                                    boxSizing: "border-box",
                                     transition: "all 0.2s"
                                 }}
-                                onFocus={(e) => e.target.style.border = "1px solid #C6DDF0"}
-                                onBlur={(e) => e.target.style.border = "1px solid #F5F5F5"}
                             />
                             <button
                                 type="button"
                                 onClick={() => toggleVisibility("current")}
                                 style={{
                                     position: "absolute",
-                                    right: "0.8rem",
+                                    right: "12px",
                                     top: "50%",
                                     transform: "translateY(-50%)",
                                     background: "none",
                                     border: "none",
-                                    color: "#aaa",
+                                    color: "var(--dash-text-muted)",
                                     cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: 0
+                                    display: "flex"
                                 }}
-                                tabIndex="-1"
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
                                     {showPasswords.current ? "visibility" : "visibility_off"}
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    <div>
-                        <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>New Password</label>
+                    <div className="form-group">
+                        <label style={{ display: "block", marginBottom: "8px", color: "var(--dash-text-secondary)", fontWeight: "700", fontSize: "0.9rem" }}>New Password</label>
                         <div style={{ position: "relative" }}>
                             <input
                                 type={showPasswords.new ? "text" : "password"}
@@ -225,46 +179,40 @@ const ResetPassword = () => {
                                 disabled={loading}
                                 style={{
                                     width: "100%",
-                                    padding: "0.9rem 2.5rem 0.9rem 1rem",
-                                    borderRadius: "8px",
-                                    border: "1px solid #F5F5F5",
-                                    backgroundColor: "#FAFAFA",
-                                    color: "#333",
+                                    padding: "14px 45px 14px 16px",
+                                    borderRadius: "14px",
+                                    border: "1px solid var(--dash-border)",
+                                    backgroundColor: "#fcfdfe",
+                                    color: "var(--dash-text)",
                                     fontSize: "0.95rem",
                                     outline: "none",
-                                    boxSizing: "border-box",
                                     transition: "all 0.2s"
                                 }}
-                                onFocus={(e) => e.target.style.border = "1px solid #C6DDF0"}
-                                onBlur={(e) => e.target.style.border = "1px solid #F5F5F5"}
                             />
                             <button
                                 type="button"
                                 onClick={() => toggleVisibility("new")}
                                 style={{
                                     position: "absolute",
-                                    right: "0.8rem",
+                                    right: "12px",
                                     top: "50%",
                                     transform: "translateY(-50%)",
                                     background: "none",
                                     border: "none",
-                                    color: "#aaa",
+                                    color: "var(--dash-text-muted)",
                                     cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: 0
+                                    display: "flex"
                                 }}
-                                tabIndex="-1"
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
                                     {showPasswords.new ? "visibility" : "visibility_off"}
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    <div>
-                        <label style={{ display: "block", marginBottom: "0.6rem", color: "#444", fontWeight: "600", fontSize: "0.9rem" }}>Confirm New Password</label>
+                    <div className="form-group">
+                        <label style={{ display: "block", marginBottom: "8px", color: "var(--dash-text-secondary)", fontWeight: "700", fontSize: "0.9rem" }}>Confirm New Password</label>
                         <div style={{ position: "relative" }}>
                             <input
                                 type={showPasswords.confirm ? "text" : "password"}
@@ -275,80 +223,85 @@ const ResetPassword = () => {
                                 disabled={loading}
                                 style={{
                                     width: "100%",
-                                    padding: "0.9rem 2.5rem 0.9rem 1rem",
-                                    borderRadius: "8px",
-                                    border: "1px solid #F5F5F5",
-                                    backgroundColor: "#FAFAFA",
-                                    color: "#333",
+                                    padding: "14px 45px 14px 16px",
+                                    borderRadius: "14px",
+                                    border: "1px solid var(--dash-border)",
+                                    backgroundColor: "#fcfdfe",
+                                    color: "var(--dash-text)",
                                     fontSize: "0.95rem",
                                     outline: "none",
-                                    boxSizing: "border-box",
                                     transition: "all 0.2s"
                                 }}
-                                onFocus={(e) => e.target.style.border = "1px solid #C6DDF0"}
-                                onBlur={(e) => e.target.style.border = "1px solid #F5F5F5"}
                             />
                             <button
                                 type="button"
                                 onClick={() => toggleVisibility("confirm")}
                                 style={{
                                     position: "absolute",
-                                    right: "0.8rem",
+                                    right: "12px",
                                     top: "50%",
                                     transform: "translateY(-50%)",
                                     background: "none",
                                     border: "none",
-                                    color: "#aaa",
+                                    color: "var(--dash-text-muted)",
                                     cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: 0
+                                    display: "flex"
                                 }}
-                                tabIndex="-1"
                             >
-                                <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
                                     {showPasswords.confirm ? "visibility" : "visibility_off"}
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            marginTop: "1rem",
-                            padding: "0.9rem",
-                            backgroundColor: "#3B82F6",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "8px",
-                            fontSize: "1rem",
-                            fontWeight: "600",
-                            cursor: loading ? "not-allowed" : "pointer",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            boxShadow: "0 4px 6px rgba(59, 130, 246, 0.2)",
-                            opacity: loading ? 0.7 : 1,
-                            transition: "all 0.2s"
-                        }}
-                    >
-                        {loading ? (
-                            <div className="spinner-small" style={{ margin: "0 auto" }}></div>
-                        ) : (
-                            <>
-                                <span className="material-symbols-outlined" style={{ fontSize: "1.2rem" }}>lock_reset</span>
-                                Update Password
-                            </>
-                        )}
-                    </button>
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                flex: 1.5,
+                                padding: "14px",
+                                backgroundColor: "var(--dash-primary)",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "14px",
+                                fontSize: "1rem",
+                                fontWeight: "700",
+                                cursor: loading ? "not-allowed" : "pointer",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "10px",
+                                boxShadow: "0 4px 15px rgba(43, 140, 238, 0.3)",
+                                transition: "all 0.2s"
+                            }}
+                        >
+                            {loading ? "Updating..." : "Update Password"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            disabled={loading}
+                            style={{
+                                flex: 1,
+                                padding: "14px",
+                                backgroundColor: "var(--dash-danger-bg)",
+                                color: "var(--dash-danger)",
+                                border: "1px solid var(--dash-danger)22",
+                                borderRadius: "14px",
+                                fontSize: "1rem",
+                                fontWeight: "600",
+                                cursor: "pointer"
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </form>
-
             </div>
         </div>
     );
 };
 
-export default ResetPassword;
+export default ResetPasswordView;

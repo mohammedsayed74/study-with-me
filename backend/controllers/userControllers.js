@@ -28,7 +28,7 @@ const loginUser = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { _id: user._id, role: user.role },
+      { _id: user._id, role: user.role, name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
@@ -79,7 +79,7 @@ const signUpUser = async (req, res) => {
     const user = await User.create({ name, email, hashedPassword, role, academicYear: role === 'student' ? Number(year) : undefined });
 
     const token = jwt.sign(
-      { _id: user._id, role: user.role },
+      { _id: user._id, role: user.role, name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );

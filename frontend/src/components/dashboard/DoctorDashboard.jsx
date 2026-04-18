@@ -134,15 +134,7 @@ function DoctorDashboard({ token }) {
             <div className="dash-stat-label">Pending Requests</div>
           </div>
         </div>
-        <div className="dash-stat-card">
-          <div className="dash-stat-icon blue">
-            <span className="material-symbols-outlined">trending_up</span>
-          </div>
-          <div className="dash-stat-info">
-            <h3>{totalFiles}</h3>
-            <div className="dash-stat-label">Top Rated Files</div>
-          </div>
-        </div>
+
         <div className="dash-stat-card">
           <div className="dash-stat-icon green">
             <span className="material-symbols-outlined">groups</span>
@@ -235,7 +227,7 @@ function DoctorDashboard({ token }) {
         <DashboardCard
           icon="workspace_premium"
           title="Highest Rated Files"
-          count={topRated.length}
+          count={topRated.slice(0, 3).length}
           loading={loadingTop}
         >
           {topRated.length === 0 ? (
@@ -258,7 +250,7 @@ function DoctorDashboard({ token }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {topRated.map((m) => (
+                  {topRated.slice(0, 3).map((m) => (
                     <tr key={m._id}>
                       <td>
                         <div className="dash-table-title">{m.title}</div>
@@ -281,7 +273,7 @@ function DoctorDashboard({ token }) {
         <DashboardCard
           icon="emoji_events"
           title="Most Active Contributors"
-          count={contributors.length}
+          count={contributors.slice(0, 3).length}
           loading={loadingContrib}
         >
           {contributors.length === 0 ? (
@@ -304,7 +296,7 @@ function DoctorDashboard({ token }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {contributors.map((c, i) => (
+                  {contributors.slice(0, 3).map((c, i) => (
                     <tr key={c._id}>
                       <td>
                         <span className={`contributor-rank ${getRankClass(i)}`}>

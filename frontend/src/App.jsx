@@ -1,17 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Home from "./pages/Home";
-import AddCourse from "./pages/AddCourse";
-import EditCourse from "./pages/EditCourse";
-import UserProfile from "./pages/UserProfile";
-import ResetPassword from "./pages/ResetPassword";
-import CourseMaterials from "./pages/CourseMaterials";
-import UploadMaterialPage from "./pages/UploadMaterialPage";
 import Dashboard from "./pages/Dashboard";
 import QuestionBank from "./pages/QuestionBank";
 import ChapterLevels from "./pages/ChapterLevels";
-import QuizArea from "./pages/QuizArea";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -30,6 +22,7 @@ function App() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        
         <Route
           path="/dashboard"
           element={
@@ -38,94 +31,36 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Question Bank and Chapter Levels might still need standalone routes or be integrated later */}
+        {/* For now, I'll keep them but the user wants everything in dashboard */}
         <Route
-          path="/home"
+          path="/course/:courseCode/question-bank"
           element={
             <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/add-course"
-          element={
-            <ProtectedRoute>
-              <AddCourse />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/edit-course/:courseCode"
-          element={
-            <ProtectedRoute>
-              <EditCourse />
+              <QuestionBank />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          }
+          path="/course/:courseCode/questions/:chapter"
+          element={<ProtectedRoute><ChapterLevels /></ProtectedRoute>}
         />
 
-        <Route
-          path="/reset-password"
-          element={
-            <ProtectedRoute>
-              <ResetPassword />
-            </ProtectedRoute>
-          }
-        />
+        {/* Redirect any other legacy routes to dashboard */}
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/add-course" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/edit-course/:courseCode" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/course/:courseCode" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/course/:courseCode/upload" element={<Navigate to="/dashboard" replace />} />
 
-        <Route
-          path="/course/:courseCode"
-          element={
-            <ProtectedRoute>
-              <CourseMaterials />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/course/:courseCode/upload"
-          element={
-            <ProtectedRoute>
-              <UploadMaterialPage />
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-  path="/course/:courseCode/question-bank"
-  element={
-    <ProtectedRoute>
-      <QuestionBank />
-    </ProtectedRoute>
-  }
-/>
-
-
-
-<Route
-  path="/course/:courseCode/questions/:chapter"
-  element={<ProtectedRoute><ChapterLevels /></ProtectedRoute>}
-/>
-
-<Route
-  path="/course/:courseCode/questions/:chapter/:level"
-  element={<ProtectedRoute><QuizArea /></ProtectedRoute>}
-/>
-
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );
-
-
 }
 
 export default App;

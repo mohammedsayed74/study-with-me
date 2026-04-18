@@ -28,8 +28,8 @@
   --dash-radius: 16px;
   --dash-radius-sm: 10px;
   --dash-radius-xs: 6px;
-  --dash-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-  --dash-shadow-lg: 0 4px 20px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.04);
+  --dash-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --dash-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.04);
   --dash-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -42,6 +42,13 @@ body:has(.dashboard-layout) {
   background: var(--dash-bg) !important;
   color: var(--dash-text);
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+body:has(.dashboard-layout) *, 
+body:has(.dashboard-layout) *::before, 
+body:has(.dashboard-layout) *::after {
+  box-sizing: border-box;
 }
 
 body:has(.dashboard-layout) #root {
@@ -76,6 +83,7 @@ body:has(.dashboard-layout) #root {
   flex-direction: column;
   z-index: 100;
   transition: transform var(--dash-transition);
+  overflow-x: hidden; /* Fix for the "slider" issue */
 }
 
 .dash-sidebar-brand {
@@ -123,6 +131,17 @@ body:has(.dashboard-layout) #root {
   flex: 1;
   padding: 16px 12px;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dash-sidebar::-webkit-scrollbar {
+  width: 5px;
+  height: 0;
+}
+
+.dash-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
 }
 
 .dash-nav-section-label {
@@ -324,7 +343,7 @@ body:has(.dashboard-layout) #root {
 .dash-content {
   flex: 1;
   padding: 28px 32px 48px;
-  max-width: 1200px;
+  max-width: 1600px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -365,11 +384,30 @@ body:has(.dashboard-layout) #root {
   flex-shrink: 0;
 }
 
-.dash-stat-icon.blue { background: var(--dash-primary-light); color: var(--dash-primary); }
-.dash-stat-icon.green { background: var(--dash-success-bg); color: var(--dash-success); }
-.dash-stat-icon.amber { background: var(--dash-warning-bg); color: var(--dash-warning); }
-.dash-stat-icon.purple { background: var(--dash-purple-bg); color: var(--dash-purple); }
-.dash-stat-icon.red { background: var(--dash-danger-bg); color: var(--dash-danger); }
+.dash-stat-icon.blue {
+  background: var(--dash-primary-light);
+  color: var(--dash-primary);
+}
+
+.dash-stat-icon.green {
+  background: var(--dash-success-bg);
+  color: var(--dash-success);
+}
+
+.dash-stat-icon.amber {
+  background: var(--dash-warning-bg);
+  color: var(--dash-warning);
+}
+
+.dash-stat-icon.purple {
+  background: var(--dash-purple-bg);
+  color: var(--dash-purple);
+}
+
+.dash-stat-icon.red {
+  background: var(--dash-danger-bg);
+  color: var(--dash-danger);
+}
 
 .dash-stat-info h3 {
   margin: 0;
@@ -532,9 +570,17 @@ body:has(.dashboard-layout) #root {
   border-radius: 50%;
 }
 
-.status-badge--pending .status-badge-dot { background: #f59e0b; }
-.status-badge--approved .status-badge-dot { background: #10b981; }
-.status-badge--rejected .status-badge-dot { background: #ef4444; }
+.status-badge--pending .status-badge-dot {
+  background: #f59e0b;
+}
+
+.status-badge--approved .status-badge-dot {
+  background: #10b981;
+}
+
+.status-badge--rejected .status-badge-dot {
+  background: #ef4444;
+}
 
 /* ═══════════════════════════════════════════════════
    RATING STARS (inline)
@@ -590,10 +636,25 @@ body:has(.dashboard-layout) #root {
   flex-shrink: 0;
 }
 
-.contributor-rank.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; }
-.contributor-rank.rank-2 { background: linear-gradient(135deg, #cbd5e1, #94a3b8); color: #fff; }
-.contributor-rank.rank-3 { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
-.contributor-rank.rank-other { background: var(--dash-bg); color: var(--dash-text-muted); }
+.contributor-rank.rank-1 {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #fff;
+}
+
+.contributor-rank.rank-2 {
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+  color: #fff;
+}
+
+.contributor-rank.rank-3 {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+}
+
+.contributor-rank.rank-other {
+  background: var(--dash-bg);
+  color: var(--dash-text-muted);
+}
 
 .contributor-avatar {
   width: 34px;
@@ -643,13 +704,16 @@ body:has(.dashboard-layout) #root {
   white-space: nowrap;
 }
 
-.dash-btn .material-symbols-outlined { font-size: 16px; }
+.dash-btn .material-symbols-outlined {
+  font-size: 16px;
+}
 
 .dash-btn-approve {
   background: var(--dash-success-bg);
   color: #047857;
   border-color: #a7f3d0;
 }
+
 .dash-btn-approve:hover {
   background: #d1fae5;
   border-color: var(--dash-success);
@@ -660,6 +724,7 @@ body:has(.dashboard-layout) #root {
   color: #b91c1c;
   border-color: #fecaca;
 }
+
 .dash-btn-reject:hover {
   background: #fee2e2;
   border-color: var(--dash-danger);
@@ -670,6 +735,7 @@ body:has(.dashboard-layout) #root {
   color: var(--dash-primary);
   border-color: #bfdbfe;
 }
+
 .dash-btn-view:hover {
   background: #dbeafe;
   border-color: var(--dash-primary);
@@ -727,8 +793,13 @@ body:has(.dashboard-layout) #root {
    SKELETON LOADING
    ═══════════════════════════════════════════════════ */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .dash-skeleton {
@@ -742,7 +813,7 @@ body:has(.dashboard-layout) #root {
   padding: 14px 0;
 }
 
-.dash-skeleton-row + .dash-skeleton-row {
+.dash-skeleton-row+.dash-skeleton-row {
   border-top: 1px solid var(--dash-border);
 }
 
@@ -760,9 +831,23 @@ body:has(.dashboard-layout) #root {
   flex-shrink: 0;
 }
 
-.skel-line-lg { width: 40%; height: 14px; }
-.skel-line-sm { width: 25%; height: 10px; margin-top: 6px; }
-.skel-badge { width: 70px; height: 24px; margin-left: auto; border-radius: 12px; }
+.skel-line-lg {
+  width: 40%;
+  height: 14px;
+}
+
+.skel-line-sm {
+  width: 25%;
+  height: 10px;
+  margin-top: 6px;
+}
+
+.skel-badge {
+  width: 70px;
+  height: 24px;
+  margin-left: auto;
+  border-radius: 12px;
+}
 
 /* ═══════════════════════════════════════════════════
    REJECT MODAL
@@ -780,8 +865,13 @@ body:has(.dashboard-layout) #root {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .dash-modal {
@@ -794,8 +884,15 @@ body:has(.dashboard-layout) #root {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(16px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .dash-modal-header {
@@ -997,6 +1094,7 @@ body:has(.dashboard-layout) #root {
   .dash-sidebar {
     transform: translateX(-100%);
   }
+
   .dash-sidebar.open {
     transform: translateX(0);
     box-shadow: var(--dash-shadow-lg);
@@ -1010,9 +1108,10 @@ body:has(.dashboard-layout) #root {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     z-index: 99;
   }
+
   .dash-overlay.visible {
     display: block;
   }
