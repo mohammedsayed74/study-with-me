@@ -69,6 +69,22 @@
   font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.5px;
+  position: relative;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1.5rem;
+  background-color: var(--auth-primary);
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 .auth-side-content {
@@ -270,21 +286,6 @@
 
 .auth-switch a:hover {
   color: #052859;
-}
-
-.typing-cursor {
-  display: inline-block;
-  width: 3px;
-  height: 1.2em;
-  background-color: currentColor;
-  margin-left: 4px;
-  animation: blink 0.8s step-end infinite;
-  vertical-align: middle;
-}
-
-@keyframes blink {
-  from, to { opacity: 1; }
-  50% { opacity: 0; }
 }
 
 /* Responsive */
