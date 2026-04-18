@@ -48,15 +48,35 @@ const getQuizQuestions = async (req, res) => {
 
         let query = {};
         if (courseCode) query.courseCode = courseCode.toUpperCase();
-        if (chapter) query.chapter = Number(chapter);
+        
+        if (chapter) {
+            const chapterNum = Number(chapter);
+            const chapterStr = String(chapter);
+            
+            query.$or = [
+                { chapter: chapterNum },
+                { chapter: chapterStr },
+                { chapter: `Chapter ${chapterNum}` },
+                { chapter: `Chapter ${chapterStr}` },
+                { chapter: { $regex: `^${chapterStr}$`, $options: 'i' } }
+            ];
+            
+            // If it's something like "chapter-1", try extracting the number too
+            const match = chapterStr.match(/\d+/);
+            if (match) {
+                const extractedNum = Number(match[0]);
+                query.$or.push({ chapter: extractedNum });
+                query.$or.push({ chapter: String(extractedNum) });
+                query.$or.push({ chapter: `Chapter ${extractedNum}` });
+            }
+        }
+        
         if (difficulty) query.difficulty = difficulty;
 
         let questions;
         if (req.user && req.user.role === 'teacher') {
-            // Teachers see everything to manage them
             questions = await Mcq.find(query).select('-__v');
         } else {
-            // Students get stripped and shuffled questions
             const rawQuestions = await Mcq.find(query)
                 .select('-correctAnswer -explanation -createdBy -__v');
             questions = rawQuestions.sort(() => 0.5 - Math.random());
