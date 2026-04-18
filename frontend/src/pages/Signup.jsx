@@ -126,7 +126,7 @@ function Signup() {
                   <input
                     name="name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder="Username"
                     value={formData.name}
                     onChange={handleChange}
                     required
@@ -142,7 +142,7 @@ function Signup() {
                   <input
                     name="email"
                     type="email"
-                    placeholder="name@university.edu"
+                    placeholder="name@example.com"
                     value={formData.email}
                     onChange={handleChange}
                     required

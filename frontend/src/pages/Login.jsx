@@ -107,7 +107,7 @@ function Login() {
                   <input
                     name="email"
                     type="email"
-                    placeholder="name@university.edu"
+                    placeholder="name@example.com"
                     value={formData.email}
                     onChange={handleChange}
                     required
