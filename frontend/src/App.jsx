@@ -4,10 +4,11 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import QuestionBank from "./pages/QuestionBank";
 import ChapterLevels from "./pages/ChapterLevels";
+import QuizArea from "./pages/QuizArea";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/" replace />;
+  return token ? children : <Navigate to="/login" replace />;
 }
 
 function RootRedirect() {
@@ -32,8 +33,7 @@ function App() {
           }
         />
 
-        {/* Question Bank and Chapter Levels might still need standalone routes or be integrated later */}
-        {/* For now, I'll keep them but the user wants everything in dashboard */}
+        {/* Question Bank and Quiz Routes */}
         <Route
           path="/course/:courseCode/question-bank"
           element={
@@ -45,7 +45,20 @@ function App() {
 
         <Route
           path="/course/:courseCode/questions/:chapter"
-          element={<ProtectedRoute><ChapterLevels /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <ChapterLevels />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/course/:courseCode/quiz/:chapter/:level"
+          element={
+            <ProtectedRoute>
+              <QuizArea />
+            </ProtectedRoute>
+          }
         />
 
         {/* Redirect any other legacy routes to dashboard */}
@@ -55,6 +68,7 @@ function App() {
         <Route path="/edit-course/:courseCode" element={<Navigate to="/dashboard" replace />} />
         <Route path="/course/:courseCode" element={<Navigate to="/dashboard" replace />} />
         <Route path="/course/:courseCode/upload" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/reset-password" element={<Navigate to="/dashboard" replace />} />
 
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

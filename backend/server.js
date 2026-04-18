@@ -1,7 +1,7 @@
 require(`dotenv`).config();
 const express = require(`express`);
-const userRoutes = require(`../backend/routes/userRoutes`);
-const courseRoutes = require(`../backend/routes/courseRoutes`);
+const userRoutes = require(`./routes/userRoutes`);
+const courseRoutes = require(`./routes/courseRoutes`);
 const materialRoutes = require("./routes/materialRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const mcqRoutes = require('./routes/mcqRoutes');
@@ -28,4 +28,3 @@ app.use(`/api/MCQs`, mcqRoutes);
 app.listen(process.env.PORT, () => {
   console.log(`server is running on port ${process.env.PORT}`);
 });
-
