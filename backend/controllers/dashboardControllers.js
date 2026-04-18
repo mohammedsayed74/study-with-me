@@ -63,9 +63,6 @@ const getStudentMyUploads = async (req, res) => {
 
 const getHighestRatedFiles = async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
 
     const materials = await Material.find({
       status: 'approved',
@@ -85,9 +82,6 @@ const getHighestRatedFiles = async (req, res) => {
 
 const getMostActiveContributors = async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
 
     const contributors = await Material.aggregate([
       {

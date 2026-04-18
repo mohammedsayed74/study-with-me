@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,16 +21,18 @@ export default function Register() {
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
   const [isConfirmHidden, setIsConfirmHidden] = useState(true);
   const [role, setRole] = useState("student");
+  const [year, setYear] = useState(1);
   const [loading, setLoading] = useState(false);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: COLORS.sky,
+    <ScrollView
+      style={{ flex: 1, backgroundColor: COLORS.sky }}
+      contentContainerStyle={{
         padding: SPACING.lg,
         justifyContent: "center",
+        flexGrow: 1,
       }}
+      keyboardShouldPersistTaps="handled"
     >
       <Text
         style={[
@@ -99,6 +108,7 @@ export default function Register() {
           onRightIconPress={() => setIsConfirmHidden((v) => !v)}
         />
 
+        {/* ── Role Toggle ── */}
         <View style={{ marginBottom: SPACING.sm }}>
           <Text
             style={{
@@ -157,6 +167,55 @@ export default function Register() {
           </View>
         </View>
 
+        {/* ── Year Picker (Student Only) ── */}
+        {role === "student" && (
+          <View style={{ marginBottom: SPACING.sm }}>
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "700",
+                color: COLORS.muted,
+                marginBottom: 8,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Academic Year
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {[1, 2, 3, 4].map((y) => {
+                const isActive = year === y;
+                return (
+                  <TouchableOpacity
+                    key={y}
+                    onPress={() => setYear(y)}
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      paddingVertical: 12,
+                      borderRadius: RADIUS.button,
+                      borderWidth: 1.5,
+                      borderColor: isActive ? COLORS.navy2 : COLORS.border,
+                      backgroundColor: isActive ? COLORS.navy2 : COLORS.white,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: 13,
+                        color: isActive ? "#fff" : COLORS.muted,
+                      }}
+                    >
+                      Year {y}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
         <TouchableOpacity
           style={{
             backgroundColor: loading ? COLORS.blue : COLORS.navy2,
@@ -177,14 +236,19 @@ export default function Register() {
             }
             try {
               setLoading(true);
-              const result = await registerUser({
-                name: fullName,
-                email,
-                password,
-                role,
-              });
+              const payload = { name: fullName, email, password, role };
+              if (role === "student") payload.year = year;
+              const result = await registerUser(payload);
               await AsyncStorage.setItem("token", result.token);
-              router.replace("/(tabs)/home");
+              await AsyncStorage.setItem(
+                "user_name",
+                result.name || result.user?.name || fullName,
+              );
+              await AsyncStorage.setItem(
+                "user_role",
+                result.role || result.user?.role || role,
+              );
+              router.replace("/(tabs)/dashboard");
             } catch (error) {
               Alert.alert("Registration failed", error.message);
             } finally {
@@ -209,7 +273,7 @@ export default function Register() {
           </Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
