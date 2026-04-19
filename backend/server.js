@@ -5,6 +5,7 @@ const courseRoutes = require(`./routes/courseRoutes`);
 const materialRoutes = require("./routes/materialRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const mcqRoutes = require('./routes/mcqRoutes');
+const communityRoutes = require("./routes/communityRoutes");
 const mongoose = require("mongoose");
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(`/api/courses`, courseRoutes);
 app.use(`/api/materials`, materialRoutes);
 app.use(`/api/dashboard`, dashboardRoutes);
 app.use(`/api/MCQs`, mcqRoutes);
+app.use(`/api/community`, communityRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`server is running on port ${process.env.PORT}`);

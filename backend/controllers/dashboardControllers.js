@@ -70,8 +70,8 @@ const getHighestRatedFiles = async (req, res) => {
     })
       .select('title courseCode averageRating totalRatings uploadedBy')
       .populate('uploadedBy', 'name')
-      .sort({ averageRating: -1, totalRatings: -1 })
-      .limit(3)
+      .sort({ averageRating: -1 })
+      .limit(10)
       .lean();
 
     res.status(200).json({ success: true, data: materials });
@@ -93,8 +93,8 @@ const getMostActiveContributors = async (req, res) => {
           },
         },
       },
-      { $sort: { approvedUploads: -1, totalUploads: -1 } },
-      { $limit: 3 },
+      { $sort: { totalUploads: -1 } },
+      { $limit: 10 },
       {
         $lookup: {
           from: 'users',

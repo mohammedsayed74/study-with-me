@@ -11,6 +11,7 @@ import AddCourseView from "../components/dashboard/AddCourseView";
 import EditCourseView from "../components/dashboard/EditCourseView";
 import UploadMaterialView from "../components/dashboard/UploadMaterialView";
 import ResetPasswordView from "../components/dashboard/ResetPasswordView";
+import CommunityView from "../components/dashboard/CommunityView";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -119,6 +120,8 @@ function Dashboard() {
           onSuccess={() => setActiveView("profile")} 
           onCancel={() => setActiveView("profile")} 
         />;
+      case "community":
+        return <CommunityView />;
       default:
         return <DoctorDashboard token={token} />;
     }
@@ -134,6 +137,7 @@ function Dashboard() {
       case "editCourse": return `Edit Course: ${selectedCourseCode}`;
       case "upload": return `Upload to ${selectedCourseCode}`;
       case "resetPassword": return "Security Settings";
+      case "community": return "Community Hub";
       default: return "Dashboard";
     }
   };
@@ -168,6 +172,10 @@ function Dashboard() {
           <button className={`dash-nav-item ${activeView === "courses" ? "active" : ""}`} onClick={() => { setActiveView("courses"); closeSidebar(); }}>
             <span className="material-symbols-outlined">library_books</span>
             Courses
+          </button>
+          <button className={`dash-nav-item ${activeView === "community" ? "active" : ""}`} onClick={() => { setActiveView("community"); closeSidebar(); }}>
+            <span className="material-symbols-outlined">forum</span>
+            Community
           </button>
           <div className="dash-nav-section-label">{isTeacher ? "Instructor Tools" : "My Stuffs"}</div>
           <button className={`dash-nav-item ${activeView === "profile" ? "active" : ""}`} onClick={() => { setActiveView("profile"); closeSidebar(); }}>
