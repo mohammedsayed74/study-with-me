@@ -6,7 +6,6 @@ import "./auth.css";
 function Signup() {
   const navigate = useNavigate();
 
-  // Typewriter effect logic
   const fullText = "Study With Me";
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -15,23 +14,19 @@ function Signup() {
   useEffect(() => {
     let timer;
     if (!isDeleting && displayText.length < fullText.length) {
-      // Typing
       timer = setTimeout(() => {
         setDisplayText(fullText.substring(0, displayText.length + 1));
       }, typingSpeed);
     } else if (!isDeleting && displayText.length === fullText.length) {
-      // Pause after finishing typing
       timer = setTimeout(() => {
         setIsDeleting(true);
-        setTypingSpeed(50); // Faster deleting
+        setTypingSpeed(50);  
       }, 2000);
     } else if (isDeleting && displayText.length > 0) {
-      // Deleting
       timer = setTimeout(() => {
         setDisplayText(fullText.substring(0, displayText.length - 1));
       }, typingSpeed);
     } else if (isDeleting && displayText.length === 0) {
-      // Reset after deleting
       setIsDeleting(false);
       setTypingSpeed(150);
     }

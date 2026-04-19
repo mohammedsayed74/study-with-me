@@ -42,20 +42,17 @@ export default function DashboardScreen() {
   const [token, setToken] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Shared states
+ 
   const [topRated, setTopRated] = useState([]);
   const [contributors, setContributors] = useState([]);
 
-  // Student states
   const [ratings, setRatings] = useState([]);
   const [uploads, setUploads] = useState([]);
   const [loadingStudent, setLoadingStudent] = useState(true);
 
-  // Teacher states
   const [pending, setPending] = useState([]);
   const [loadingTeacher, setLoadingTeacher] = useState(true);
 
-  // Modal
   const [rejectTarget, setRejectTarget] = useState(null);
 
   useFocusEffect(
@@ -77,7 +74,6 @@ export default function DashboardScreen() {
         setUser(decoded);
         fetchData(decoded, storedToken);
       } catch (err) {
-        // fallback if decoding fails
         const name = await AsyncStorage.getItem("user_name");
         const role = await AsyncStorage.getItem("user_role");
         const fallbackUser = { name, role };
@@ -188,7 +184,6 @@ export default function DashboardScreen() {
   );
 }
 
-// --- Components ---
 
 function DashHeader({ user, onLogout }) {
   const isTeacher = user.role === "teacher" || user.role === "doctor";
@@ -335,7 +330,6 @@ const formatDate = (d) => {
   return `${date.toLocaleString('default', { month: 'short' })} ${date.getDate()}, ${date.getFullYear()}`;
 };
 
-// --- Sub-dashboards ---
 
 function StudentDashboard({ ratings, uploads, topRated, contributors, loading }) {
   const totalUploads = uploads.length;

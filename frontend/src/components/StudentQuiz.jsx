@@ -149,7 +149,7 @@ function StudentQuiz({ courseCode, chapter, level }) {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fcff" }}>
+      <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
         <div style={{ textAlign: "center" }}>
           <div className="spinner" style={{ width: "50px", height: "50px", border: "5px solid #eee", borderTopColor: "#2b8cee", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 20px" }}></div>
           <p style={{ color: "#5483B3", fontWeight: "600" }}>Preparing your quiz...</p>
@@ -161,7 +161,7 @@ function StudentQuiz({ courseCode, chapter, level }) {
 
   if (error || questions.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8fcff", padding: "20px" }}>
+      <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
         <div style={{ 
           maxWidth: "500px", 
           width: "100%", 
@@ -201,7 +201,7 @@ function StudentQuiz({ courseCode, chapter, level }) {
     const total = questions.length;
     const percentage = Math.round((correctCount / total) * 100);
     return (
-      <div style={{ minHeight: "100vh", padding: "40px 5%", background: "#f8fcff" }}>
+      <div style={{ width: "100%", maxWidth: "800px", margin: "0 auto" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", background: "#fff", borderRadius: "32px", padding: "60px 40px", textAlign: "center", boxShadow: "0 20px 50px rgba(0,0,0,0.05)", border: "1px solid rgba(125, 160, 202, 0.1)" }}>
           <h2 style={{ fontSize: "2rem", fontWeight: "800", color: "#052859", marginBottom: "40px" }}>Quiz Completed!</h2>
           
@@ -251,8 +251,7 @@ function StudentQuiz({ courseCode, chapter, level }) {
   const totalQ = questions.length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fcff", padding: "40px 5%" }}>
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+    <div style={{ width: "100%", maxWidth: "1000px", margin: "0 auto", display: "flex", flexDirection: "column", flex: 1 }}>
         
         {/* Header Section */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
@@ -371,7 +370,7 @@ function StudentQuiz({ courseCode, chapter, level }) {
                             {verificationResult.isCorrect ? "verified" : "info"}
                         </span>
                         <strong style={{ color: verificationResult.isCorrect ? "#166534" : "#9a3412", fontSize: "1.1rem" }}>
-                            {verificationResult.isCorrect ? "Correct Solution" : "Learning Note"}
+                            {verificationResult.isCorrect ? "Correct Solution" : "Justification"}
                         </strong>
                     </div>
                     <p style={{ margin: 0, color: verificationResult.isCorrect ? "#166534" : "#9a3412", lineHeight: "1.6", fontSize: "0.95rem" }}>
@@ -443,7 +442,6 @@ function StudentQuiz({ courseCode, chapter, level }) {
                 <span style={{ fontSize: "0.9rem", color: "#64748b", fontWeight: "600" }}>Incorrect: {incorrectCount}</span>
             </div>
         </div>
-      </div>
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

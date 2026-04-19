@@ -155,8 +155,7 @@ function Dashboard() {
             <span className="material-symbols-outlined">school</span>
           </div>
           <div>
-            <h2>Material Archive</h2>
-            <span>Dashboard</span>
+            <h2>Study With Me</h2>
           </div>
         </div>
 

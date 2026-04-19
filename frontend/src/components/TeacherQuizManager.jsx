@@ -58,7 +58,7 @@ function TeacherQuizManager({ courseCode, chapter, level }) {
     const payload = {
       ...formData,
       courseCode,
-      chapter: chapter, // Pass exactly as is, backend now handles it
+      chapter: chapter, 
       difficulty: level,
     };
 

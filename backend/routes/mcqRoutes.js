@@ -8,13 +8,15 @@ const {
     getQuizQuestions,
     verifyAnswer,
     updateQuestion,
-    deleteQuestion
+    deleteQuestion,
+    getCourseChapters
 } = require('../controllers/mcqControllers');
 
 router.use(requireAuth);
 
 router.post('/', createQuestion);
 router.get('/', getQuizQuestions);
+router.get('/:courseCode/chapters', getCourseChapters);
 router.post('/verify', verifyAnswer);
 router.put('/:id', updateQuestion);
 router.delete('/:id', deleteQuestion);

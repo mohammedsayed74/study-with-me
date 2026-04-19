@@ -12,7 +12,19 @@ const createQuestion = async (req, res) => {
             explanation
         } = req.body;
 
-        const alreadyExists = await Mcq.findOne({ questionText, options, correctAnswer, courseCode, chapter, difficulty });
+        let finalChapter = chapter;
+        if (typeof chapter === 'string') {
+            const match = chapter.match(/\d+/);
+            if (match) {
+                finalChapter = Number(match[0]);
+            } else {
+                finalChapter = Number(chapter);
+            }
+        }
+        
+        finalChapter = isNaN(finalChapter) ? 0 : finalChapter;
+
+        const alreadyExists = await Mcq.findOne({ questionText, options, correctAnswer, courseCode, chapter: finalChapter, difficulty });
 
         if (alreadyExists) {
             return res.status(400).json({ message: "Question already exists" });
@@ -25,19 +37,9 @@ const createQuestion = async (req, res) => {
             });
         }
 
-        let finalChapter = chapter;
-        if (typeof chapter === 'string') {
-            const match = chapter.match(/\d+/);
-            if (match) {
-                finalChapter = Number(match[0]);
-            } else {
-                finalChapter = Number(chapter);
-            }
-        }
-
         const newQuestion = await Mcq.create({
             courseCode: courseCode.toUpperCase(),
-            chapter: isNaN(finalChapter) ? 0 : finalChapter,
+            chapter: finalChapter,
             difficulty,
             questionText,
             options,
@@ -60,24 +62,17 @@ const getQuizQuestions = async (req, res) => {
         if (courseCode) query.courseCode = courseCode.toUpperCase();
         
         if (chapter) {
-            const chapterNum = Number(chapter);
-            const chapterStr = String(chapter);
-            
-            query.$or = [
-                { chapter: chapterNum },
-                { chapter: chapterStr },
-                { chapter: `Chapter ${chapterNum}` },
-                { chapter: `Chapter ${chapterStr}` },
-                { chapter: { $regex: `^${chapterStr}$`, $options: 'i' } }
-            ];
-            
-            // If it's something like "chapter-1", try extracting the number too
-            const match = chapterStr.match(/\d+/);
-            if (match) {
-                const extractedNum = Number(match[0]);
-                query.$or.push({ chapter: extractedNum });
-                query.$or.push({ chapter: String(extractedNum) });
-                query.$or.push({ chapter: `Chapter ${extractedNum}` });
+            let parsedChapter;
+            if (typeof chapter === 'string') {
+                const match = chapter.match(/\d+/);
+                parsedChapter = match ? Number(match[0]) : Number(chapter);
+            } else {
+                parsedChapter = Number(chapter);
+            }
+            if (!isNaN(parsedChapter)) {
+                query.chapter = parsedChapter;
+            } else {
+                return res.status(400).json({ message: "Invalid chapter format" });
             }
         }
         
@@ -135,6 +130,16 @@ const updateQuestion = async (req, res) => {
                 message: "The correct answer must exactly match one of the provided options!"
             });
         }
+        
+        if (req.body.chapter) {
+            let finalChapter = req.body.chapter;
+            if (typeof req.body.chapter === 'string') {
+                const match = req.body.chapter.match(/\d+/);
+                finalChapter = match ? Number(match[0]) : Number(req.body.chapter);
+            }
+            req.body.chapter = isNaN(finalChapter) ? 0 : finalChapter;
+        }
+
         const updatedQuestion = await Mcq.findByIdAndUpdate(id, req.body, {
             new: true,
             runValidators: true
@@ -170,10 +175,31 @@ const deleteQuestion = async (req, res) => {
     }
 };
 
+const getCourseChapters = async (req, res) => {
+    try {
+        const { courseCode } = req.params;
+        const chaptersData = await Mcq.aggregate([
+            { $match: { courseCode: courseCode.toUpperCase() } },
+            { $group: { _id: "$chapter", count: { $sum: 1 } } },
+            { $sort: { _id: 1 } }
+        ]);
+
+        const chapters = chaptersData.map(item => ({
+            id: item._id,
+            count: item.count
+        }));
+
+        res.status(200).json({ success: true, count: chapters.length, data: chapters });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createQuestion,
     getQuizQuestions,
     verifyAnswer,
     updateQuestion,
-    deleteQuestion
+    deleteQuestion,
+    getCourseChapters
 };

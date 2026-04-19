@@ -15,15 +15,19 @@ function ChapterLevels() {
 
     return (
         <div className="course-page" style={{ 
-            padding: "40px 5%", 
+            padding: "20px 5%", 
             background: "linear-gradient(135deg, #f8fcff 0%, #eef6ff 100%)",
-            minHeight: "100vh",
-            display: "block"
+            height: "100vh",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
         }}>
             {/* Navigation Header */}
             <div style={{ 
-                maxWidth: "1200px", 
-                margin: "0 auto 40px", 
+                maxWidth: "1200px",
+                width: "100%",
+                margin: "0 auto 20px", 
                 display: "flex", 
                 alignItems: "center", 
                 justifyContent: "space-between" 
@@ -60,7 +64,7 @@ function ChapterLevels() {
             </div>
 
             {/* Main Title Area */}
-            <div style={{ maxWidth: "1200px", margin: "0 auto 48px", textAlign: "center" }}>
+            <div style={{ maxWidth: "1200px", width: "100%", margin: "0 auto 24px", textAlign: "center", flexShrink: 0 }}>
                 <h1 style={{ 
                     fontSize: "2.2rem", 
                     fontWeight: "800", 
@@ -84,10 +88,13 @@ function ChapterLevels() {
             {/* Levels Grid */}
             <div style={{ 
                 maxWidth: "1100px", 
+                width: "100%",
                 margin: "0 auto", 
                 display: "grid", 
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", 
-                gap: "30px" 
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+                gap: "20px",
+                flexGrow: 1,
+                alignContent: "center"
             }}>
                 {levels.map((level) => (
                     <Link
@@ -98,7 +105,7 @@ function ChapterLevels() {
                         <div style={{
                             background: "#fff",
                             borderRadius: "28px",
-                            padding: "40px 32px",
+                            padding: "30px 24px",
                             border: "1px solid rgba(125, 160, 202, 0.15)",
                             boxShadow: "0 10px 30px -5px rgba(0,0,0,0.05)",
                             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -124,17 +131,17 @@ function ChapterLevels() {
                         }}
                     >
                             <div style={{ 
-                                width: "70px", 
-                                height: "70px", 
+                                width: "60px", 
+                                height: "60px", 
                                 borderRadius: "22px", 
                                 background: `${level.color}15`, 
                                 color: level.color, 
                                 display: "flex", 
                                 alignItems: "center", 
                                 justifyContent: "center",
-                                marginBottom: "24px"
+                                margin: "0 auto 20px"
                             }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: "36px" }}>{level.icon}</span>
+                                <span className="material-symbols-outlined" style={{ fontSize: "32px" }}>{level.icon}</span>
                             </div>
 
                             <h2 style={{ 
@@ -148,9 +155,9 @@ function ChapterLevels() {
 
                             <p style={{ 
                                 color: "#5483B3", 
-                                fontSize: "1rem", 
-                                lineHeight: "1.6",
-                                marginBottom: "32px",
+                                fontSize: "0.95rem", 
+                                lineHeight: "1.5",
+                                marginBottom: "24px",
                                 flexGrow: 1
                             }}>
                                 {level.description}
@@ -158,7 +165,7 @@ function ChapterLevels() {
 
                             <div style={{
                                 width: "100%",
-                                padding: "14px",
+                                padding: "12px",
                                 borderRadius: "16px",
                                 background: level.color,
                                 color: "#fff",

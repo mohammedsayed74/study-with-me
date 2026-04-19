@@ -483,7 +483,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.error,
   },
 
-  // Modal
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",

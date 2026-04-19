@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-/* ═══════════════════════════════════════════════════
-   DESIGN TOKENS
-   ═══════════════════════════════════════════════════ */
+
 :root {
   --dash-primary: #2b8cee;
   --dash-primary-light: #e8f4fd;
@@ -33,9 +31,7 @@
   --dash-transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ═══════════════════════════════════════════════════
-   PAGE RESET FOR DASHBOARD
-   ═══════════════════════════════════════════════════ */
+
 body:has(.dashboard-layout) {
   margin: 0;
   padding: 0;

@@ -35,7 +35,6 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
-      // Use search endpoint if there's a keyword, otherwise use the direct course endpoint
       let url;
       if (searchKeyword) {
         const searchParams = new URLSearchParams({

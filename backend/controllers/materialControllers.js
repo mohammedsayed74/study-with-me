@@ -1,5 +1,6 @@
 const Material = require("../models/Material");
 const Course = require("../models/Course");
+const User = require("../models/User");
 const cloudinary = require(`cloudinary`).v2;
 
 const uploadMaterial = async (req, res) => {
@@ -259,6 +260,7 @@ const searchMaterials = async (req, res) => {
     }
 
     let keywordCourseCodes = [];
+    let keywordUserIds = [];
 
     if (keyword) {
       const keywordCourses = await Course.find({
@@ -269,6 +271,12 @@ const searchMaterials = async (req, res) => {
       }).select("courseCode");
 
       keywordCourseCodes = keywordCourses.map((c) => c.courseCode);
+
+      const keywordUsers = await User.find({
+        name: { $regex: keyword, $options: "i" },
+      }).select("_id");
+
+      keywordUserIds = keywordUsers.map((u) => u._id);
     }
 
     if (keyword) {
@@ -276,6 +284,7 @@ const searchMaterials = async (req, res) => {
         { title: { $regex: keyword, $options: "i" } },
         { courseCode: { $regex: keyword, $options: "i" } },
         { courseCode: { $in: keywordCourseCodes } },
+        { uploadedBy: { $in: keywordUserIds } },
       ];
     }
 

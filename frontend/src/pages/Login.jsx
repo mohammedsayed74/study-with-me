@@ -6,7 +6,6 @@ import "./auth.css";
 function Login() {
   const navigate = useNavigate();
 
-  // Typewriter effect logic
   const fullText = "Study With Me";
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -15,23 +14,19 @@ function Login() {
   useEffect(() => {
     let timer;
     if (!isDeleting && displayText.length < fullText.length) {
-      // Typing
       timer = setTimeout(() => {
         setDisplayText(fullText.substring(0, displayText.length + 1));
       }, typingSpeed);
     } else if (!isDeleting && displayText.length === fullText.length) {
-      // Pause after finishing typing
       timer = setTimeout(() => {
         setIsDeleting(true);
-        setTypingSpeed(50); // Faster deleting
+        setTypingSpeed(50);
       }, 2000);
     } else if (isDeleting && displayText.length > 0) {
-      // Deleting
       timer = setTimeout(() => {
         setDisplayText(fullText.substring(0, displayText.length - 1));
       }, typingSpeed);
     } else if (isDeleting && displayText.length === 0) {
-      // Reset after deleting
       setIsDeleting(false);
       setTypingSpeed(150);
     }
@@ -106,13 +101,13 @@ function Login() {
           <div className="auth-side-content">
             <h1>Elevate Your Learning Journey.</h1>
             <p>
-              Access a comprehensive archive of materials, practice with smart MCQs, 
-              and track your academic progress in one unified dashboard.
+              Access a community-driven & comprehensive archive of materials,
+             enhance your academic experience.
             </p>
           </div>
           
           <div className="auth-side-footer">
-            © 2026 Material Archive. All rights reserved.
+            © 2026 Study With Me. All rights reserved.
           </div>
         </div>
 

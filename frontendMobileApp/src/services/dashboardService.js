@@ -5,7 +5,6 @@ const authHeaders = (token) => ({
   Authorization: `Bearer ${token}`,
 });
 
-// ── Student endpoints ──────────────────────────────────────────────
 
 export async function getStudentRatings(token) {
   const res = await fetch(`${API_BASE_URL}/api/dashboard/student/my-ratings`, {
@@ -23,7 +22,6 @@ export async function getStudentUploads(token) {
   return data.data || [];
 }
 
-// ── Teacher (Doctor) endpoints ─────────────────────────────────────
 
 export async function getDoctorTopRated(token) {
   const res = await fetch(`${API_BASE_URL}/api/dashboard/doctor/top-rated`, {
@@ -49,7 +47,6 @@ export async function getDoctorPending(token) {
   return data.data || [];
 }
 
-// ── Actions ────────────────────────────────────────────────────────
 
 export async function approveMaterial(id, token) {
   const res = await fetch(`${API_BASE_URL}/api/materials/${id}/approve`, {

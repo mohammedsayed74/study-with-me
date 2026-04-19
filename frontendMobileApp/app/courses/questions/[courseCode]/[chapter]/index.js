@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../../../../src/theme/theme";
 
 export default function LevelSelectionScreen() {
@@ -10,9 +10,9 @@ export default function LevelSelectionScreen() {
   const formattedChapter = chapter?.replace("-", " ");
   
   const levels = [
-    { id: "easy", title: "Easy" },
-    { id: "medium", title: "Medium" },
-    { id: "hard", title: "Hard" },
+    { id: "easy", title: "Easy", color: "#10b981", icon: "sentiment-satisfied", description: "Basic concepts and straightforward questions to build confidence." },
+    { id: "medium", title: "Medium", color: "#f59e0b", icon: "sentiment-neutral", description: "Balanced challenge focusing on application and logical reasoning." },
+    { id: "hard", title: "Hard", color: "#ef4444", icon: "sentiment-dissatisfied", description: "Complex scenarios and advanced problems for mastery." }
   ];
 
   return (
@@ -27,18 +27,26 @@ export default function LevelSelectionScreen() {
         </View>
       </View>
 
-      <View style={styles.content}>
-        {levels.map((level) => (
-          <TouchableOpacity
-            key={level.id}
-            style={styles.levelBtn}
-            onPress={() => router.push(`/courses/questions/${courseCode}/${chapter}/${level.id}`)}
-          >
-            <Text style={styles.levelBtnText}>{level.title}</Text>
-            <Feather name="chevron-right" size={20} color={COLORS.white} />
-          </TouchableOpacity>
-        ))}
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        <View style={styles.content}>
+          {levels.map((level) => (
+            <View key={level.id} style={styles.levelCard}>
+              <View style={[styles.iconWrapper, { backgroundColor: level.color + '15' }]}>
+                <MaterialIcons name={level.icon} size={32} color={level.color} />
+              </View>
+              <Text style={styles.levelTitle}>{level.title}</Text>
+              <Text style={styles.levelDesc}>{level.description}</Text>
+              <TouchableOpacity
+                style={[styles.startBtn, { backgroundColor: level.color }]}
+                onPress={() => router.push(`/courses/questions/${courseCode}/${chapter}/${level.id}`)}
+              >
+                <Text style={styles.startBtnText}>Practice {level.title}</Text>
+                <Feather name="arrow-right" size={16} color={COLORS.white} />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -78,19 +86,59 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: SPACING.lg,
-    gap: SPACING.md,
+    paddingBottom: 40,
+    gap: SPACING.lg,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
-  levelBtn: {
-    backgroundColor: COLORS.navy2,
-    padding: SPACING.lg,
-    borderRadius: RADIUS.button,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  levelCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.card,
+    padding: SPACING.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(125, 160, 202, 0.15)',
+    elevation: 2,
+    shadowColor: COLORS.navy2,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    alignItems: 'center',
+    width: '100%',
   },
-  levelBtnText: {
+  iconWrapper: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  levelTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#052859',
+    marginBottom: 8,
+  },
+  levelDesc: {
+    fontSize: 14,
+    color: COLORS.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: SPACING.xl,
+  },
+  startBtn: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  startBtnText: {
     color: COLORS.white,
+    fontWeight: '700',
     fontSize: 16,
-    fontWeight: "700",
   },
 });
