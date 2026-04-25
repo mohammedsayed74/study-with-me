@@ -177,6 +177,13 @@ function Dashboard() {
             <span className="material-symbols-outlined">forum</span>
             Community
           </button>
+          
+          <div className="dash-nav-section-label">AI Tools</div>
+          <button className="dash-nav-item" onClick={() => navigate("/ainotebook")}>
+            <span className="material-symbols-outlined">auto_awesome</span>
+            AI Notebook
+          </button>
+          
           <div className="dash-nav-section-label">{isTeacher ? "Instructor Tools" : "My Stuffs"}</div>
           <button className={`dash-nav-item ${activeView === "profile" ? "active" : ""}`} onClick={() => { setActiveView("profile"); closeSidebar(); }}>
             <span className="material-symbols-outlined">person</span>

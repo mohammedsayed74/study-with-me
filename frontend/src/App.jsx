@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import QuestionBank from "./pages/QuestionBank";
 import ChapterLevels from "./pages/ChapterLevels";
 import QuizArea from "./pages/QuizArea";
+import AiNotebook from "./pages/AiNotebook";
+import AiDocumentView from "./pages/AiDocumentView";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -57,6 +59,24 @@ function App() {
           element={
             <ProtectedRoute>
               <QuizArea />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* AI Notebook Routes */}
+        <Route
+          path="/ainotebook"
+          element={
+            <ProtectedRoute>
+              <AiNotebook />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ainotebook/:documentId"
+          element={
+            <ProtectedRoute>
+              <AiDocumentView />
             </ProtectedRoute>
           }
         />
