@@ -10,7 +10,7 @@ export default function Index() {
       try {
         const token = await AsyncStorage.getItem("token");
         if (token) {
-          router.replace("/(tabs)/home");
+          router.replace("/(tabs)/dashboard");
         } else {
           router.replace("/auth/login");
         }

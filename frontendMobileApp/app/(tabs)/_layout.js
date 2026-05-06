@@ -41,6 +41,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="ainotebook"
+        options={{
+          title: "Notebook AI",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book" size={size || 24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",

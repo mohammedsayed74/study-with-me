@@ -12,12 +12,18 @@ export const COLORS = {
   grey: "grey",
   card: "#F5F8FF",
   success: "#10B981",
+  authPrimary: "#2b8cee",
+  authBg: "#f8fcff",
+  authTextMain: "#021024",
+  authTextMuted: "#5483b3",
+  authInputBg: "#f1f5f9",
+  authInputBorder: "#e2e8f0",
 };
 
 export const RADIUS = {
-  card: 20,
-  input: 16,
-  button: 18,
+  card: 24,
+  input: 12,
+  button: 12,
 };
 
 export const SPACING = {
@@ -30,15 +36,15 @@ export const SPACING = {
 };
 
 export const TYPO = {
-  h1: { fontSize: 28, fontWeight: "800", color: COLORS.text },
-  h2: { fontSize: 22, fontWeight: "800", color: COLORS.text },
+  h1: { fontSize: 28, fontFamily: "PlusJakartaSans_800ExtraBold", color: COLORS.text },
+  h2: { fontSize: 22, fontFamily: "PlusJakartaSans_800ExtraBold", color: COLORS.text },
   body: {
     fontSize: 14,
-    fontWeight: "400",
+    fontFamily: "PlusJakartaSans_500Medium",
     color: COLORS.muted,
     lineHeight: 20,
   },
-  label: { fontSize: 12, fontWeight: "600", color: COLORS.text },
-  link: { fontSize: 12, fontWeight: "700", color: COLORS.blue },
-  button: { fontSize: 14, fontWeight: "800", color: COLORS.white },
+  label: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold", color: COLORS.text },
+  link: { fontSize: 12, fontFamily: "PlusJakartaSans_700Bold", color: COLORS.authPrimary },
+  button: { fontSize: 16, fontFamily: "PlusJakartaSans_700Bold", color: COLORS.white },
 };

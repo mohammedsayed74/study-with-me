@@ -1,4 +1,4 @@
-require(`dotenv`).config();
+require(`dotenv`).config({ override: true });
 const express = require(`express`);
 const userRoutes = require(`./routes/userRoutes`);
 const courseRoutes = require(`./routes/courseRoutes`);

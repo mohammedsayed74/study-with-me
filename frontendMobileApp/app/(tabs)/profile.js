@@ -9,12 +9,16 @@ import {
   Modal,
   ActivityIndicator,
   Alert,
+  Image,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
+import * as ImagePicker from "expo-image-picker";
+import Animated, { FadeInUp, FadeInDown } from "react-native-reanimated";
 import { getProfile } from "../../src/services/profileService";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
 
@@ -55,7 +59,7 @@ function GenderModal({ visible, selected, onSelect, onClose }) {
                 {opt}
               </Text>
               {selected === opt && (
-                <Ionicons name="checkmark" size={18} color={COLORS.navy2} />
+                <Ionicons name="checkmark-circle" size={20} color={COLORS.authPrimary} />
               )}
             </TouchableOpacity>
           ))}
@@ -65,25 +69,20 @@ function GenderModal({ visible, selected, onSelect, onClose }) {
   );
 }
 
-function Avatar({ name }) {
-  const initials = name
-    ? name
-        .trim()
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "?";
+function Avatar({ imageUri, onPress }) {
   return (
-    <View style={styles.avatarRing}>
-      <LinearGradient
-        colors={["#5483B3", "#052859"]}
-        style={styles.avatarGradient}
-      >
-        <Text style={styles.avatarInitials}>{initials}</Text>
-      </LinearGradient>
-    </View>
+    <TouchableOpacity onPress={onPress} style={styles.avatarRing} activeOpacity={0.8}>
+      {imageUri ? (
+        <Image source={{ uri: imageUri }} style={styles.avatarImage} />
+      ) : (
+        <View style={styles.avatarDefault}>
+          <Ionicons name="person" size={45} color={COLORS.authPrimary} />
+        </View>
+      )}
+      <View style={styles.avatarEditBadge}>
+        <Ionicons name="camera" size={14} color={COLORS.white} />
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -106,6 +105,9 @@ export default function ProfileScreen() {
   const [nickName, setNickName] = useState("");
   const [gender, setGender] = useState("");
   const [description, setDescription] = useState("");
+  
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [coverPhoto, setCoverPhoto] = useState(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
@@ -126,20 +128,12 @@ export default function ProfileScreen() {
       const userEmail = data.user.email;
       setEmail(userEmail);
 
-      setName(
-        (await AsyncStorage.getItem(`profileName_${userEmail}`)) ||
-          data.user.name ||
-          "",
-      );
-      setNickName(
-        (await AsyncStorage.getItem(`profileNickName_${userEmail}`)) || "",
-      );
-      setGender(
-        (await AsyncStorage.getItem(`profileGender_${userEmail}`)) || "",
-      );
-      setDescription(
-        (await AsyncStorage.getItem(`profileDesc_${userEmail}`)) || "",
-      );
+      setName((await AsyncStorage.getItem(`profileName_${userEmail}`)) || data.user.name || "");
+      setNickName((await AsyncStorage.getItem(`profileNickName_${userEmail}`)) || "");
+      setGender((await AsyncStorage.getItem(`profileGender_${userEmail}`)) || "");
+      setDescription((await AsyncStorage.getItem(`profileDesc_${userEmail}`)) || "");
+      setProfilePhoto((await AsyncStorage.getItem(`profilePhoto_${userEmail}`)) || null);
+      setCoverPhoto((await AsyncStorage.getItem(`coverPhoto_${userEmail}`)) || null);
     } catch (err) {
       setError(err.message || "Failed to load profile.");
     } finally {
@@ -157,8 +151,29 @@ export default function ProfileScreen() {
       await AsyncStorage.setItem(`profileNickName_${email}`, nickName);
       await AsyncStorage.setItem(`profileGender_${email}`, gender);
       await AsyncStorage.setItem(`profileDesc_${email}`, description);
+      if (profilePhoto) await AsyncStorage.setItem(`profilePhoto_${email}`, profilePhoto);
+      if (coverPhoto) await AsyncStorage.setItem(`coverPhoto_${email}`, coverPhoto);
     }
     setIsEditing((v) => !v);
+  };
+
+  const pickImage = async (type) => {
+    if (!isEditing) return;
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: type === 'cover' ? [16, 9] : [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      if (type === 'cover') {
+        setCoverPhoto(result.assets[0].uri);
+      } else {
+        setProfilePhoto(result.assets[0].uri);
+      }
+    }
   };
 
   const handleLogout = () => {
@@ -178,8 +193,8 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View style={styles.centerScreen}>
-        <ActivityIndicator size="large" color={COLORS.navy2} />
-        <Text style={[TYPO.body, { marginTop: 12 }]}>Loading profile…</Text>
+        <ActivityIndicator size="large" color={COLORS.authPrimary} />
+        <Text style={[TYPO.body, { marginTop: 12, fontFamily: "PlusJakartaSans_500Medium" }]}>Loading profile…</Text>
       </View>
     );
   }
@@ -188,11 +203,11 @@ export default function ProfileScreen() {
     return (
       <View style={styles.centerScreen}>
         <Ionicons name="alert-circle-outline" size={48} color={COLORS.error} />
-        <Text style={[TYPO.body, { marginTop: 12, textAlign: "center" }]}>
+        <Text style={[TYPO.body, { marginTop: 12, textAlign: "center", fontFamily: "PlusJakartaSans_500Medium" }]}>
           {error}
         </Text>
         <TouchableOpacity style={styles.retryBtn} onPress={loadProfile}>
-          <Text style={TYPO.button}>Retry</Text>
+          <Text style={{color: COLORS.white, fontFamily: "PlusJakartaSans_700Bold"}}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -200,140 +215,159 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView style={styles.root} showsVerticalScrollIndicator={false}>
-      <LinearGradient
-        colors={["#C6DDF0", "#EEDFEA", "#FEF7E2"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.banner}
-      />
-
-      <View style={styles.avatarWrapper}>
-        <Avatar name={name} />
-      </View>
-
-      <View style={styles.nameRow}>
-        <Text style={styles.displayName}>{name || "Your Name"}</Text>
-        <View
-          style={[
-            styles.roleBadge,
-            role === "teacher" && styles.roleBadgeTeacher,
-          ]}
-        >
-          <Text style={styles.roleBadgeText}>
-            {role === "teacher" ? "Teacher" : "Student"}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.displayEmail}>{email}</Text>
-
-      <View style={styles.actionRow}>
-        <TouchableOpacity
-          style={[styles.editBtn, isEditing && styles.saveBtn]}
-          onPress={handleToggleEdit}
-        >
-          <Ionicons
-            name={isEditing ? "checkmark-circle-outline" : "create-outline"}
-            size={18}
-            color="#fff"
+      <TouchableOpacity 
+        activeOpacity={isEditing ? 0.8 : 1} 
+        onPress={() => pickImage('cover')}
+      >
+        {coverPhoto ? (
+          <Image source={{ uri: coverPhoto }} style={styles.banner} />
+        ) : (
+          <LinearGradient
+            colors={['#052859', '#021024']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.banner}
           />
-          <Text style={styles.editBtnText}>
-            {isEditing ? "Save" : "Edit Profile"}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.resetBtn}
-          onPress={() => router.push("/auth/resetPassword")}
-        >
-          <Ionicons name="lock-closed-outline" size={16} color={COLORS.navy2} />
-          <Text style={styles.resetBtnText}>Password</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Profile Info</Text>
-
-        <FieldCard label="Full Name">
-          <TextInput
-            style={[styles.input, isEditing && styles.inputEditing]}
-            value={name}
-            editable={isEditing}
-            onChangeText={setName}
-            placeholder="Your full name"
-            placeholderTextColor={COLORS.muted}
-          />
-        </FieldCard>
-
-        <FieldCard label="Nick Name">
-          <TextInput
-            style={[styles.input, isEditing && styles.inputEditing]}
-            value={nickName}
-            editable={isEditing}
-            onChangeText={setNickName}
-            placeholder="Your nickname"
-            placeholderTextColor={COLORS.muted}
-          />
-        </FieldCard>
-
-        <FieldCard label="Gender">
-          <TouchableOpacity
-            style={[
-              styles.input,
-              styles.inputRow,
-              isEditing && styles.inputEditing,
-            ]}
-            onPress={() => isEditing && setShowGenderModal(true)}
-            activeOpacity={isEditing ? 0.7 : 1}
-          >
-            <Text style={gender ? styles.inputText : styles.inputPlaceholder}>
-              {gender || "Select gender"}
-            </Text>
-            {isEditing && (
-              <Ionicons name="chevron-down" size={16} color={COLORS.muted} />
-            )}
-          </TouchableOpacity>
-        </FieldCard>
-
-        <FieldCard label="About Me">
-          <TextInput
-            style={[
-              styles.input,
-              styles.textarea,
-              isEditing && styles.inputEditing,
-            ]}
-            value={description}
-            editable={isEditing}
-            onChangeText={setDescription}
-            placeholder="Write something about yourself…"
-            placeholderTextColor={COLORS.muted}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </FieldCard>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>My Email Address</Text>
-        <View style={styles.emailCard}>
-          <View style={styles.emailIconCircle}>
-            <Ionicons name="mail" size={20} color={COLORS.blue} />
+        )}
+        {isEditing && (
+          <View style={styles.coverEditOverlay}>
+            <Ionicons name="camera" size={24} color={COLORS.white} />
+            <Text style={styles.coverEditText}>Change Cover</Text>
           </View>
-          <View>
-            <Text style={styles.emailText}>{email}</Text>
-            <Text style={styles.emailSub}>Primary email</Text>
-          </View>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={20} color="#fff" />
-        <Text style={styles.logoutBtnText}>Log Out</Text>
+        )}
       </TouchableOpacity>
 
-      <View style={{ height: 40 }} />
+      <Animated.View entering={FadeInDown.duration(600).springify()} style={styles.avatarWrapper}>
+        <Avatar imageUri={profilePhoto} onPress={() => pickImage('profile')} />
+      </Animated.View>
+
+      <Animated.View entering={FadeInUp.delay(100).duration(600).springify()}>
+        <View style={styles.nameRow}>
+          <Text style={styles.displayName}>{name || "Your Name"}</Text>
+          <View
+            style={[
+              styles.roleBadge,
+              role === "teacher" && styles.roleBadgeTeacher,
+            ]}
+          >
+            <Text style={styles.roleBadgeText}>
+              {role === "teacher" ? "Teacher" : "Student"}
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.displayEmail}>{email}</Text>
+
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.editBtn, isEditing && styles.saveBtn]}
+            onPress={handleToggleEdit}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={isEditing ? "checkmark-circle" : "create-outline"}
+              size={18}
+              color="#fff"
+            />
+            <Text style={styles.editBtnText}>
+              {isEditing ? "Save Profile" : "Edit Profile"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.resetBtn}
+            onPress={() => router.push("/auth/resetPassword")}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="lock-closed" size={16} color={COLORS.authTextMuted} />
+            <Text style={styles.resetBtnText}>Password</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Profile Details</Text>
+
+          <FieldCard label="Full Name">
+            <TextInput
+              style={[styles.input, isEditing && styles.inputEditing]}
+              value={name}
+              editable={isEditing}
+              onChangeText={setName}
+              placeholder="Your full name"
+              placeholderTextColor={COLORS.authTextMuted}
+            />
+          </FieldCard>
+
+          <FieldCard label="Nick Name">
+            <TextInput
+              style={[styles.input, isEditing && styles.inputEditing]}
+              value={nickName}
+              editable={isEditing}
+              onChangeText={setNickName}
+              placeholder="Your nickname"
+              placeholderTextColor={COLORS.authTextMuted}
+            />
+          </FieldCard>
+
+          <FieldCard label="Gender">
+            <TouchableOpacity
+              style={[
+                styles.input,
+                styles.inputRow,
+                isEditing && styles.inputEditing,
+              ]}
+              onPress={() => isEditing && setShowGenderModal(true)}
+              activeOpacity={isEditing ? 0.7 : 1}
+            >
+              <Text style={gender ? styles.inputText : styles.inputPlaceholder}>
+                {gender || "Select gender"}
+              </Text>
+              {isEditing && (
+                <Ionicons name="chevron-down" size={18} color={COLORS.authPrimary} />
+              )}
+            </TouchableOpacity>
+          </FieldCard>
+
+          <FieldCard label="About Me">
+            <TextInput
+              style={[
+                styles.input,
+                styles.textarea,
+                isEditing && styles.inputEditing,
+              ]}
+              value={description}
+              editable={isEditing}
+              onChangeText={setDescription}
+              placeholder="Write something about yourself…"
+              placeholderTextColor={COLORS.authTextMuted}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </FieldCard>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account Access</Text>
+          <View style={styles.emailCard}>
+            <View style={styles.emailIconCircle}>
+              <Ionicons name="mail" size={20} color={COLORS.authPrimary} />
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.emailText}>{email}</Text>
+              <Text style={styles.emailSub}>Primary email address</Text>
+            </View>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+          <Ionicons name="log-out" size={20} color="#fff" />
+          <Text style={styles.logoutBtnText}>Log Out</Text>
+        </TouchableOpacity>
+
+        <View style={{ height: 60 }} />
+      </Animated.View>
 
       <GenderModal
         visible={showGenderModal}
@@ -345,23 +379,23 @@ export default function ProfileScreen() {
   );
 }
 
-const AVATAR_SIZE = 90;
-const BANNER_HEIGHT = 130;
+const AVATAR_SIZE = 100;
+const BANNER_HEIGHT = 160;
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.white },
+  root: { flex: 1, backgroundColor: COLORS.authBg },
 
   centerScreen: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: SPACING.xl,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.authBg,
   },
 
   retryBtn: {
     marginTop: SPACING.lg,
-    backgroundColor: COLORS.navy2,
+    backgroundColor: COLORS.authPrimary,
     paddingVertical: 12,
     paddingHorizontal: 28,
     borderRadius: RADIUS.button,
@@ -371,35 +405,62 @@ const styles = StyleSheet.create({
     height: BANNER_HEIGHT,
     width: "100%",
   },
+  coverEditOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  coverEditText: {
+    color: COLORS.white,
+    fontFamily: "PlusJakartaSans_700Bold",
+    marginTop: 8,
+  },
   avatarWrapper: {
     alignSelf: "center",
     marginTop: -(AVATAR_SIZE / 2),
     zIndex: 10,
   },
   avatarRing: {
-    width: AVATAR_SIZE + 6,
-    height: AVATAR_SIZE + 6,
-    borderRadius: (AVATAR_SIZE + 6) / 2,
-    backgroundColor: COLORS.white,
+    width: AVATAR_SIZE + 8,
+    height: AVATAR_SIZE + 8,
+    borderRadius: (AVATAR_SIZE + 8) / 2,
+    backgroundColor: COLORS.authBg,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowColor: COLORS.navy,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 8,
   },
-  avatarGradient: {
+  avatarImage: {
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
+  },
+  avatarDefault: {
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: AVATAR_SIZE / 2,
+    backgroundColor: COLORS.authInputBg,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.authInputBorder,
   },
-  avatarInitials: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: 1,
+  avatarEditBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: COLORS.authPrimary,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: COLORS.authBg,
   },
 
   nameRow: {
@@ -410,68 +471,94 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   displayName: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: COLORS.text,
+    fontSize: 24,
+    fontFamily: "PlusJakartaSans_800ExtraBold",
+    color: COLORS.authTextMain,
   },
   roleBadge: {
-    backgroundColor: "#EBF3FF",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    backgroundColor: COLORS.authInputBg,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: COLORS.authInputBorder,
   },
-  roleBadgeTeacher: { backgroundColor: "#FFF7E0" },
+  roleBadgeTeacher: { 
+    backgroundColor: "#fffbeb",
+    borderColor: "#fde68a"
+  },
   roleBadgeText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: COLORS.navy2,
+    fontSize: 12,
+    fontFamily: "PlusJakartaSans_800ExtraBold",
+    color: COLORS.authPrimary,
   },
   displayEmail: {
     textAlign: "center",
-    color: COLORS.muted,
-    fontSize: 13,
+    color: COLORS.authTextMuted,
+    fontSize: 14,
+    fontFamily: "PlusJakartaSans_500Medium",
     marginTop: 4,
   },
 
   actionRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 10,
+    gap: 12,
     marginTop: SPACING.lg,
     paddingHorizontal: SPACING.lg,
   },
   editBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: COLORS.navy2,
-    paddingVertical: 10,
-    paddingHorizontal: 22,
+    gap: 8,
+    backgroundColor: COLORS.authPrimary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: RADIUS.button,
     flex: 1,
     justifyContent: "center",
+    shadowColor: COLORS.authPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  saveBtn: { backgroundColor: COLORS.success },
-  editBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-
+  saveBtn: { 
+    backgroundColor: COLORS.success,
+    shadowColor: COLORS.success,
+  },
+  editBtnText: { 
+    color: "#fff", 
+    fontFamily: "PlusJakartaSans_700Bold", 
+    fontSize: 14 
+  },
   resetBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     backgroundColor: COLORS.white,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: RADIUS.button,
-    borderWidth: 1.5,
-    borderColor: COLORS.navy2,
+    borderWidth: 1,
+    borderColor: COLORS.authInputBorder,
     flex: 1,
     justifyContent: "center",
+    shadowColor: COLORS.navy,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  resetBtnText: { color: COLORS.navy2, fontWeight: "700", fontSize: 14 },
+  resetBtnText: { 
+    color: COLORS.authTextMain, 
+    fontFamily: "PlusJakartaSans_700Bold", 
+    fontSize: 14 
+  },
 
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.authInputBorder,
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.xl,
   },
@@ -482,61 +569,64 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "800",
-    color: COLORS.text,
+    fontFamily: "PlusJakartaSans_800ExtraBold",
+    color: COLORS.authTextMain,
     marginBottom: SPACING.md,
   },
 
   fieldCard: { marginBottom: SPACING.md },
   fieldLabel: {
     fontSize: 12,
-    fontWeight: "700",
-    color: COLORS.muted,
-    marginBottom: 6,
+    fontFamily: "PlusJakartaSans_700Bold",
+    color: COLORS.authTextMuted,
+    marginBottom: 8,
     textTransform: "uppercase",
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: "#F5F8FF",
+    backgroundColor: COLORS.white,
     borderRadius: RADIUS.input,
     paddingHorizontal: SPACING.md,
-    paddingVertical: 13,
+    paddingVertical: 14,
     fontSize: 15,
-    color: COLORS.text,
-    borderWidth: 1.5,
-    borderColor: "transparent",
+    fontFamily: "PlusJakartaSans_500Medium",
+    color: COLORS.authTextMain,
+    borderWidth: 1,
+    borderColor: COLORS.authInputBorder,
   },
   inputEditing: {
-    backgroundColor: COLORS.white,
-    borderColor: COLORS.blue,
+    backgroundColor: COLORS.authInputBg,
+    borderColor: COLORS.authPrimary,
   },
-  inputText: { fontSize: 15, color: COLORS.text },
-  inputPlaceholder: { fontSize: 15, color: COLORS.muted },
+  inputText: { fontSize: 15, fontFamily: "PlusJakartaSans_500Medium", color: COLORS.authTextMain },
+  inputPlaceholder: { fontSize: 15, fontFamily: "PlusJakartaSans_500Medium", color: COLORS.authTextMuted },
   inputRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  textarea: { minHeight: 100 },
+  textarea: { minHeight: 120 },
 
   emailCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F8FF",
+    backgroundColor: COLORS.white,
     borderRadius: RADIUS.card,
     padding: SPACING.md,
     gap: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.authInputBorder,
   },
   emailIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#EBF3FF",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.authInputBg,
     justifyContent: "center",
     alignItems: "center",
   },
-  emailText: { fontSize: 14, fontWeight: "600", color: COLORS.text },
-  emailSub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
+  emailText: { fontSize: 15, fontFamily: "PlusJakartaSans_700Bold", color: COLORS.authTextMain },
+  emailSub: { fontSize: 13, fontFamily: "PlusJakartaSans_500Medium", color: COLORS.authTextMuted, marginTop: 2 },
 
   logoutBtn: {
     flexDirection: "row",
@@ -545,45 +635,54 @@ const styles = StyleSheet.create({
     gap: 8,
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.xl,
-    backgroundColor: "#D32F2F",
-    paddingVertical: 14,
+    backgroundColor: "#fee2e2",
+    paddingVertical: 16,
     borderRadius: RADIUS.button,
+    borderWidth: 1,
+    borderColor: "#fca5a5",
   },
-  logoutBtnText: { color: "#fff", fontWeight: "800", fontSize: 15 },
+  logoutBtnText: { color: COLORS.error, fontFamily: "PlusJakartaSans_800ExtraBold", fontSize: 15 },
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalBox: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: SPACING.lg,
-    shadowColor: "#000",
+    width: "85%",
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.card,
+    padding: SPACING.xl,
+    shadowColor: COLORS.navy,
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.2,
-    shadowRadius: 16,
+    shadowRadius: 20,
     elevation: 10,
   },
   modalTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: COLORS.text,
-    marginBottom: SPACING.md,
+    fontSize: 18,
+    fontFamily: "PlusJakartaSans_800ExtraBold",
+    color: COLORS.authTextMain,
+    marginBottom: SPACING.lg,
     textAlign: "center",
   },
   modalOption: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: SPACING.md,
-    borderRadius: 12,
-    marginBottom: 4,
+    borderRadius: RADIUS.button,
+    marginBottom: 8,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.authInputBorder,
   },
-  modalOptionActive: { backgroundColor: "#EBF3FF" },
-  modalOptionText: { fontSize: 15, color: COLORS.text },
-  modalOptionTextActive: { fontWeight: "700", color: COLORS.navy2 },
+  modalOptionActive: { 
+    backgroundColor: COLORS.authInputBg,
+    borderColor: COLORS.authPrimary,
+  },
+  modalOptionText: { fontSize: 15, fontFamily: "PlusJakartaSans_600SemiBold", color: COLORS.authTextMain },
+  modalOptionTextActive: { fontFamily: "PlusJakartaSans_800ExtraBold", color: COLORS.authPrimary },
 });

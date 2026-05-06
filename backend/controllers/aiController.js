@@ -4,7 +4,7 @@ const pdfParse = require("pdf-parse");
 const { GoogleGenAI } = require("@google/genai");
 
 // Initialize Gemini API (Make sure GEMINI_API_KEY is in .env)
-const ai = new GoogleGenAI({});
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 exports.uploadPdf = async (req, res) => {
   try {
