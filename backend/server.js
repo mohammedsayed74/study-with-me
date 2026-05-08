@@ -29,6 +29,11 @@ app.use(`/api/MCQs`, mcqRoutes);
 app.use(`/api/community`, communityRoutes);
 app.use(`/api/ai`, aiRoutes);
 
+app.use((err, req, res, next) => {
+  console.error("Global Error Handler:", err);
+  res.status(500).json({ error: err.message, stack: err.stack, name: err.name });
+});
+
 app.listen(process.env.PORT, () => {
   console.log(`server is running on port ${process.env.PORT}`);
 });

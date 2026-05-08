@@ -26,16 +26,22 @@ export async function uploadProfilePicture(imageUri, fileName, mimeType) {
       type: mimeType || "image/jpeg",
     });
 
-    const response = await axios.post(`${API_BASE_URL}/api/users/upload-profile-picture`, formData, {
+    const response = await fetch(`${API_BASE_URL}/api/users/upload-profile-picture`, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
       },
+      body: formData,
     });
 
-    return response.data;
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to upload profile picture");
+    }
+
+    return data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to upload profile picture");
+    throw new Error(error.message || "Failed to upload profile picture");
   }
 }
 

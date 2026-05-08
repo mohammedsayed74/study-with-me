@@ -28,16 +28,22 @@ export const uploadDocument = async (fileUri, fileName) => {
     });
     formData.append('title', fileName);
 
-    const response = await axios.post(`${API_BASE_URL}/api/ai/upload`, formData, {
+    const response = await fetch(`${API_BASE_URL}/api/ai/upload`, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
       },
+      body: formData,
     });
 
-    return response.data;
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || data.message || "Failed to upload document");
+    }
+
+    return data;
   } catch (error) {
-    throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to upload document");
+    throw new Error(error.message || "Failed to upload document");
   }
 };
 

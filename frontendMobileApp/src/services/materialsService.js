@@ -60,19 +60,23 @@ export const uploadMaterial = async (courseCode, title, fileUri, fileName) => {
       type: "application/pdf",
     });
 
-    const response = await axios.post(
+    const response = await fetch(
       `${API_BASE_URL}/api/materials/upload/${courseCode}`,
-      formData,
       {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
+        body: formData,
       }
     );
-    return response.data;
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Upload failed");
+    }
+    return data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Upload failed");
+    throw new Error(error.message || "Upload failed");
   }
 };
 
