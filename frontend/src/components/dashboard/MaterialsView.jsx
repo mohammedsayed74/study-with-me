@@ -3,12 +3,13 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import StarRating from "../StarRating";
 
-function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
+function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank, isFavoritesView = false }) {
   const [materials, setMaterials] = useState([]);
   const [pendingMaterials, setPendingMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("approved");
+  const [favorites, setFavorites] = useState([]);
 
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchSort, setSearchSort] = useState("newest");
@@ -36,7 +37,13 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
       const headers = { Authorization: `Bearer ${token}` };
 
       let url;
-      if (searchKeyword) {
+      if (isFavoritesView) {
+        url = `/api/users/favorite-materials`;
+        // Also ensure search works if possible, or just fetch all favorites
+        if (searchKeyword) {
+          // Client side search or we can ignore it for favorites
+        }
+      } else if (searchKeyword) {
         const searchParams = new URLSearchParams({
           courseCode: courseCode,
           keyword: searchKeyword,
@@ -58,7 +65,7 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
       setMaterials(approvedRes.data.data || []);
       setTotalPages(approvedRes.data.totalPages || 1);
 
-      if (isTeacher) {
+      if (isTeacher && !isFavoritesView) {
         const pendingRes = await axios.get(`/api/materials/${courseCode}/pending`, { headers });
         setPendingMaterials(pendingRes.data.data || []);
       }
@@ -71,10 +78,40 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
   };
 
   useEffect(() => {
-    if (courseCode) {
+    if (courseCode || isFavoritesView) {
       fetchMaterials();
+      getProfile();
     }
-  }, [courseCode, token, isTeacher, currentPage, fetchTrigger]);
+  }, [courseCode, isFavoritesView, token, isTeacher, currentPage, fetchTrigger]);
+
+  const getProfile = async () => {
+    try {
+      if (!token) return;
+      const res = await axios.get("/api/users/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFavorites(res.data.user?.favoriteMaterials || []);
+    } catch (err) {
+      console.log("Error fetching profile for favorites:", err);
+    }
+  };
+
+  const toggleFavorite = async (materialId) => {
+    try {
+      const res = await axios.post(
+        "/api/users/toggle-favorite-material",
+        { materialId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setFavorites(res.data.favoriteMaterials || []);
+      // If we are in favorites view and we un-favorite something, we might want to remove it from the list
+      if (isFavoritesView && res.data.message.includes('removed')) {
+        setMaterials(prev => prev.filter(m => m._id !== materialId));
+      }
+    } catch (err) {
+      console.error("Error toggling favorite:", err);
+    }
+  };
 
   const executeSearch = () => {
     if (currentPage !== 1) {
@@ -146,7 +183,9 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
           <p style={{ margin: 0, color: 'var(--dash-text-muted)' }}>
             {isPendingView
               ? "Hooray! No pending materials to review at the moment."
-              : `There are currently no approved materials for ${courseCode}.`
+              : isFavoritesView
+                ? "You haven't added any materials to your favorites yet."
+                : `There are currently no approved materials for ${courseCode}.`
             }
           </p>
         </div>
@@ -169,8 +208,39 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
             boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            position: 'relative'
           }}>
+            
+            {/* 🟢 FAVORITE HEART ICON */}
+            {!isPendingView && (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(material._id);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: favorites.includes(material._id) ? '#f44336' : 'var(--dash-text-muted)',
+                  transition: 'color 0.3s ease, transform 0.2s ease',
+                  transform: favorites.includes(material._id) ? 'scale(1.1)' : 'scale(1)',
+                  zIndex: 10
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = favorites.includes(material._id) ? 'scale(1.1)' : 'scale(1)'}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '26px', fontVariationSettings: favorites.includes(material._id) ? "'FILL' 1" : "'FILL' 0" }}>
+                  {favorites.includes(material._id) ? "favorite" : "favorite_border"}
+                </span>
+              </div>
+            )}
+
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
               <div style={{ 
                 width: '48px', 
@@ -255,20 +325,22 @@ function MaterialsView({ courseCode, onBack, onUpload, onQuestionBank }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button className="dash-btn dash-btn-view" onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '12px' }}>
             <span className="material-symbols-outlined">arrow_back</span>
-            Back to Courses
+            Back
           </button>
-          <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>{courseCode} Materials</h1>
+          <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>{isFavoritesView ? 'Favorite Materials' : `${courseCode} Materials`}</h1>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onQuestionBank} className="dash-btn dash-btn-view" style={{ padding: '10px 22px', fontWeight: 600, borderRadius: '12px', border: '1px solid var(--dash-primary)', color: 'var(--dash-primary)' }}>
-            Question Bank
-          </button>
-          <button onClick={onUpload} className="dash-btn dash-btn-approve" style={{ padding: '10px 22px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', backgroundColor: 'var(--dash-primary)', boxShadow: '0 4px 12px rgba(43, 140, 238, 0.2)' }}>
-            <span className="material-symbols-outlined">add_circle</span>
-            Upload Material
-          </button>
-        </div>
+        {!isFavoritesView && (
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={onQuestionBank} className="dash-btn dash-btn-view" style={{ padding: '10px 22px', fontWeight: 600, borderRadius: '12px', border: '1px solid var(--dash-primary)', color: 'var(--dash-primary)' }}>
+              Question Bank
+            </button>
+            <button onClick={onUpload} className="dash-btn dash-btn-approve" style={{ padding: '10px 22px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', backgroundColor: 'var(--dash-primary)', boxShadow: '0 4px 12px rgba(43, 140, 238, 0.2)' }}>
+              <span className="material-symbols-outlined">add_circle</span>
+              Upload Material
+            </button>
+          </div>
+        )}
       </div>
 
       {error && <div className="materials-error" style={{ marginBottom: '24px' }}>{error}</div>}

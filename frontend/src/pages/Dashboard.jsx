@@ -89,6 +89,17 @@ function Dashboard() {
           onAddCourse={() => setActiveView("addCourse")}
           onEditCourse={openEditCourse}
         />;
+      case "following":
+        return <CoursesList 
+          userRole={user.role} 
+          onCourseClick={openCourse} 
+          showOnlyFollowing={true}
+        />;
+      case "favorites":
+        return <MaterialsView 
+          isFavoritesView={true} 
+          onBack={() => setActiveView("dashboard")} 
+        />;
       case "materials":
         return <MaterialsView 
           courseCode={selectedCourseCode} 
@@ -131,6 +142,8 @@ function Dashboard() {
     switch (activeView) {
       case "dashboard": return isTeacher ? "Instructor Dashboard" : "Student Dashboard";
       case "courses": return "Courses Catalog";
+      case "following": return "Following Courses";
+      case "favorites": return "Favorite Materials";
       case "materials": return `Materials: ${selectedCourseCode}`;
       case "profile": return "My Profile";
       case "addCourse": return "Create New Course";
@@ -176,6 +189,14 @@ function Dashboard() {
           <button className={`dash-nav-item ${activeView === "community" ? "active" : ""}`} onClick={() => { setActiveView("community"); closeSidebar(); }}>
             <span className="material-symbols-outlined">forum</span>
             Community
+          </button>
+          <button className={`dash-nav-item ${activeView === "following" ? "active" : ""}`} onClick={() => { setActiveView("following"); closeSidebar(); }}>
+            <span className="material-symbols-outlined">star</span>
+            Following
+          </button>
+          <button className={`dash-nav-item ${activeView === "favorites" ? "active" : ""}`} onClick={() => { setActiveView("favorites"); closeSidebar(); }}>
+            <span className="material-symbols-outlined">favorite</span>
+            Favorites
           </button>
           
           <div className="dash-nav-section-label">AI Tools</div>

@@ -2,6 +2,7 @@ const User = require(`../models/User`);
 const Material = require(`../models/Material`);
 const jwt = require(`jsonwebtoken`);
 const bcrypt = require(`bcrypt`);
+const cloudinary = require(`cloudinary`).v2;
 
 const loginUser = async (req, res) => {
   try {
@@ -142,4 +143,148 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, signUpUser, getUserProfile, resetPassword };
+const toggleFollowCourse = async (req, res) => {
+  try {
+    const { courseCode } = req.body;
+    
+    if (!courseCode) {
+      return res.status(400).json({ message: 'Course code is required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isFollowing = user.followedCourses.includes(courseCode);
+    
+    if (isFollowing) {
+      user.followedCourses = user.followedCourses.filter(code => code !== courseCode);
+    } else {
+      user.followedCourses.push(courseCode);
+    }
+
+    await user.save();
+
+    res.status(200).json({ 
+      message: isFollowing ? 'Course unfollowed' : 'Course followed',
+      followedCourses: user.followedCourses 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const toggleFavoriteMaterial = async (req, res) => {
+  try {
+    const { materialId } = req.body;
+    
+    if (!materialId) {
+      return res.status(400).json({ message: 'Material ID is required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isFavorited = user.favoriteMaterials.includes(materialId);
+    
+    if (isFavorited) {
+      user.favoriteMaterials = user.favoriteMaterials.filter(id => id.toString() !== materialId.toString());
+    } else {
+      user.favoriteMaterials.push(materialId);
+    }
+
+    await user.save();
+
+    res.status(200).json({ 
+      message: isFavorited ? 'Material removed from favorites' : 'Material added to favorites',
+      favoriteMaterials: user.favoriteMaterials 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getFavoriteMaterials = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate({
+      path: 'favoriteMaterials',
+      populate: {
+        path: 'uploadedBy',
+        select: 'name'
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ data: user.favoriteMaterials });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const uploadProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete old profile picture from Cloudinary if exists
+    if (user.profilePicturePublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.profilePicturePublicId);
+      } catch (err) {
+        console.error("Error deleting old profile picture from Cloudinary:", err);
+      }
+    }
+
+    user.profilePicture = req.file.secure_url || req.file.path;
+    user.profilePicturePublicId = req.file.filename || req.file.public_id;
+    
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profilePicture: user.profilePicture
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteProfilePicture = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.profilePicturePublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.profilePicturePublicId);
+      } catch (err) {
+        console.error("Error deleting profile picture from Cloudinary:", err);
+      }
+    }
+
+    user.profilePicture = "";
+    user.profilePicturePublicId = "";
+    
+    await user.save();
+
+    res.status(200).json({ message: "Profile picture removed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { loginUser, signUpUser, getUserProfile, resetPassword, toggleFollowCourse, toggleFavoriteMaterial, getFavoriteMaterials, uploadProfilePicture, deleteProfilePicture };

@@ -19,6 +19,22 @@ const userSchema = new mongoose.Schema(
         return this.role === "student";
       },
     },
+    followedCourses: {
+      type: [String],
+      default: []
+    },
+    favoriteMaterials: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Material'
+    }],
+    profilePicture: {
+      type: String,
+      default: ""
+    },
+    profilePicturePublicId: {
+      type: String,
+      default: ""
+    }
   },
   { timestamps: true },
 );

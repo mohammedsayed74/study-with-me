@@ -2,32 +2,32 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse }) {
+function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse, showOnlyFollowing = false }) {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [searchDepartment, setSearchDepartment] = useState("");
   const [searchYear, setSearchYear] = useState("");
 
   // 🟢 FOLLOW FEATURE ADDED
-  const [following, setFollowing] = useState(() => {
-    return JSON.parse(localStorage.getItem("followingCourses")) || [];
-  });
+  const [following, setFollowing] = useState([]);
 
-  const toggleFollow = (courseCode) => {
-    let updated;
-
-    if (following.includes(courseCode)) {
-      updated = following.filter(c => c !== courseCode);
-    } else {
-      updated = [...following, courseCode];
+  const toggleFollow = async (courseCode) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "/api/users/toggle-follow",
+        { courseCode },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setFollowing(res.data.followedCourses);
+    } catch (err) {
+      console.error("Error toggling follow:", err);
     }
-
-    setFollowing(updated);
-    localStorage.setItem("followingCourses", JSON.stringify(updated));
   };
 
   const filteredCourses = courses.filter((course) => {
     let match = true;
+    if (showOnlyFollowing && !following.includes(course.courseCode)) match = false;
     if (searchDepartment) match = match && course.department === searchDepartment;
     if (searchYear) match = match && course.year === Number(searchYear);
     return match;
@@ -35,7 +35,21 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse }) {
 
   useEffect(() => {
     getCourses();
+    getProfile();
   }, []);
+
+  const getProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await axios.get("/api/users/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFollowing(res.data.user?.followedCourses || []);
+    } catch (err) {
+      console.log("Error fetching profile for follows:", err);
+    }
+  };
 
   const getCourses = async () => {
     try {
@@ -128,10 +142,37 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse }) {
               border: '1px solid var(--dash-border)',
               display: 'flex',
               flexDirection: 'column',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              position: 'relative'
             }}
           >
             
+            {/* 🟢 FOLLOW HEART ICON */}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFollow(course.courseCode);
+              }}
+              style={{
+                position: 'absolute',
+                top: '28px',
+                right: '28px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: following.includes(course.courseCode) ? '#FFC107' : 'var(--dash-text-muted)',
+                transition: 'color 0.3s ease, transform 0.2s ease',
+                transform: following.includes(course.courseCode) ? 'scale(1.1)' : 'scale(1)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = following.includes(course.courseCode) ? 'scale(1.1)' : 'scale(1)'}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '28px', fontVariationSettings: following.includes(course.courseCode) ? "'FILL' 1" : "'FILL' 0" }}>
+                star
+              </span>
+            </div>
+
             {/* ICON */}
             <div style={{
               width: '56px',
@@ -152,36 +193,6 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse }) {
             <p style={{ margin: '0 0 12px 0', color: 'var(--dash-text-muted)' }}>
               {course.courseCode}
             </p>
-
-            {/* 🟢 FOLLOW BUTTON ADDED HERE */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFollow(course.courseCode);
-              }}
-              style={{
-                marginBottom: '16px',
-                padding: '6px 14px',
-                borderRadius: '999px',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 700,
-                background: following.includes(course.courseCode)
-                  ? 'var(--dash-success)'
-                  : 'var(--dash-primary)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                width: 'fit-content'
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                {following.includes(course.courseCode) ? "check" : "add"}
-              </span>
-
-              {following.includes(course.courseCode) ? "Followed" : "Follow"}
-            </button>
 
             {/* TEACHER ACTIONS */}
             {userRole === "teacher" && (
