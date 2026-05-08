@@ -13,13 +13,29 @@ import {
   Platform,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import RNPickerSelect from 'react-native-picker-select';
 import { COLORS, RADIUS, SPACING, TYPO } from '../../src/theme/theme';
 import { createCourse } from '../../src/services/coursesService';
+
+const DEPARTMENT_ITEMS = [
+  { label: 'Computer Science', value: 'Computer Science' },
+  { label: 'Mathematics', value: 'Mathematics' },
+  { label: 'Statistics', value: 'Statistics' },
+];
+
+const YEAR_ITEMS = [
+  { label: 'Year 1', value: 1 },
+  { label: 'Year 2', value: 2 },
+  { label: 'Year 3', value: 3 },
+  { label: 'Year 4', value: 4 },
+];
 
 export default function AddCourse() {
   const [title, setTitle] = useState('');
   const [courseCode, setCourseCode] = useState('');
   const [description, setDescription] = useState('');
+  const [department, setDepartment] = useState('Computer Science');
+  const [year, setYear] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,7 +48,7 @@ export default function AddCourse() {
 
     setLoading(true);
     try {
-      await createCourse(title.trim(), courseCode.trim().toUpperCase(), description.trim());
+      await createCourse(title.trim(), courseCode.trim().toUpperCase(), description.trim(), department, year);
       Alert.alert('Success', 'Course created successfully!', [
         { text: 'OK', onPress: () => router.replace('/(tabs)/courses') },
       ]);
@@ -94,6 +110,40 @@ export default function AddCourse() {
             editable={!loading}
             autoCapitalize="characters"
           />
+
+          <Text style={styles.label}>Department</Text>
+          <View style={styles.pickerWrapper}>
+            <RNPickerSelect
+              value={department}
+              onValueChange={(value) => setDepartment(value)}
+              items={DEPARTMENT_ITEMS}
+              placeholder={{}}
+              useNativeAndroidPickerStyle={false}
+              disabled={loading}
+            >
+              <View style={styles.pickerCustomChild}>
+                <Text style={styles.pickerCustomText}>{department}</Text>
+                <Feather name="chevron-down" size={18} color={COLORS.muted} />
+              </View>
+            </RNPickerSelect>
+          </View>
+
+          <Text style={styles.label}>Academic Year</Text>
+          <View style={styles.pickerWrapper}>
+            <RNPickerSelect
+              value={year}
+              onValueChange={(value) => setYear(Number(value))}
+              items={YEAR_ITEMS}
+              placeholder={{}}
+              useNativeAndroidPickerStyle={false}
+              disabled={loading}
+            >
+              <View style={styles.pickerCustomChild}>
+                <Text style={styles.pickerCustomText}>Year {year}</Text>
+                <Feather name="chevron-down" size={18} color={COLORS.muted} />
+              </View>
+            </RNPickerSelect>
+          </View>
 
           <Text style={styles.label}>Description</Text>
           <TextInput
@@ -210,6 +260,24 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  pickerWrapper: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.input,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+  },
+  pickerCustomChild: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 13,
+  },
+  pickerCustomText: {
+    fontSize: 14,
+    color: COLORS.text,
   },
   buttonRow: {
     flexDirection: 'row',

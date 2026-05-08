@@ -3,64 +3,72 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../config/api";
 
 export const getDocuments = async () => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/ai/documents`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to fetch documents");
-  return data;
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.get(`${API_BASE_URL}/api/ai/documents`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch documents");
+  }
 };
 
 export const uploadDocument = async (fileUri, fileName) => {
-  const token = await AsyncStorage.getItem("token");
-  
-  const formData = new FormData();
-  formData.append('pdf', {
-    uri: fileUri,
-    name: fileName,
-    type: 'application/pdf',
-  });
-  formData.append('title', fileName);
+  try {
+    const token = await AsyncStorage.getItem("token");
+    
+    const formData = new FormData();
+    formData.append('pdf', {
+      uri: fileUri,
+      name: fileName,
+      type: 'application/pdf',
+    });
+    formData.append('title', fileName);
 
-  const res = await fetch(`${API_BASE_URL}/api/ai/upload`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
+    const response = await axios.post(`${API_BASE_URL}/api/ai/upload`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || data.message || "Failed to upload document");
-  return data;
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || error.response?.data?.message || "Failed to upload document");
+  }
 };
 
 export const getDocumentDetails = async (documentId) => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/ai/documents/${documentId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to fetch document details");
-  return data;
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.get(`${API_BASE_URL}/api/ai/documents/${documentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch document details");
+  }
 };
 
 export const sendChatMessage = async (documentId, message) => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/ai/chat/${documentId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ message }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to send message");
-  return data;
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.post(
+      `${API_BASE_URL}/api/ai/chat/${documentId}`,
+      { message },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to send message");
+  }
 };

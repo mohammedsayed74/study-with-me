@@ -13,67 +13,66 @@ export const getCourses = async () => {
 };
 
 export const getCourse = async (courseCode) => {
-  const res = await fetch(`${API_BASE_URL}/api/courses/${courseCode}`);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to fetch course");
-  return data.data;
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/courses/${courseCode}`);
+    return response.data.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to fetch course");
+  }
 };
 
-export const createCourse = async (title, courseCode, description) => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/courses/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ title, courseCode, description }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to create course");
-  return data;
+export const createCourse = async (title, courseCode, description, department, year) => {
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.post(
+      `${API_BASE_URL}/api/courses`,
+      { title, courseCode, description, department, year },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to create course");
+  }
 };
 
 export const updateCourse = async (courseCode, title, description) => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/courses/${courseCode}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ title, description }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to update course");
-  return data;
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.put(
+      `${API_BASE_URL}/api/courses/${courseCode}`,
+      { title, description },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to update course");
+  }
 };
 
 export const deleteCourse = async (courseCode) => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/courses/${courseCode}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to delete course");
-  return data;
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.delete(
+      `${API_BASE_URL}/api/courses/${courseCode}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to delete course");
+  }
 };
 
 export const toggleFollowCourse = async (courseCode) => {
-  const token = await AsyncStorage.getItem("token");
-  const res = await fetch(`${API_BASE_URL}/api/users/toggle-follow`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ courseCode }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to toggle follow");
-  return data;
+  try {
+    const token = await AsyncStorage.getItem("token");
+    const response = await axios.post(
+      `${API_BASE_URL}/api/users/toggle-follow`,
+      { courseCode },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Failed to toggle follow");
+  }
 };
 
