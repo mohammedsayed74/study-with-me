@@ -22,7 +22,9 @@ import {
   approveMaterial,
   deleteMaterial,
   rateMaterial,
+  toggleFavoriteMaterial,
 } from "../../src/services/materialsService";
+import { getProfile } from "../../src/services/profileService";
 
 export default function CourseMaterialsScreen() {
   const { courseCode } = useLocalSearchParams();
@@ -36,6 +38,7 @@ export default function CourseMaterialsScreen() {
   const [actionLoading, setActionLoading] = useState(null);
   const [ratings, setRatings] = useState({});
   const [ratingModal, setRatingModal] = useState({ visible: false, id: null, temp: 0 });
+  const [favoriteMaterials, setFavoriteMaterials] = useState([]);
 
   const confirmRating = async () => {
   if (ratingModal.temp === 0) return;
@@ -58,6 +61,15 @@ export default function CourseMaterialsScreen() {
       const decoded = jwtDecode(token);
       const teacher = decoded.role === "teacher";
       setIsTeacher(teacher);
+
+      try {
+        const profileRes = await getProfile(token);
+        // Ensure favoriteMaterials are strings (IDs) for easy checking
+        const favs = profileRes.user?.favoriteMaterials?.map(m => m._id ? m._id : m) || [];
+        setFavoriteMaterials(favs);
+      } catch (e) {
+        console.error("Profile fetch error:", e);
+      }
 
       const approved = await getMaterials(courseCode);
       setMaterials(approved);
@@ -131,6 +143,19 @@ export default function CourseMaterialsScreen() {
     }
   };
 
+  const handleToggleFavorite = async (materialId) => {
+    try {
+      await toggleFavoriteMaterial(materialId);
+      setFavoriteMaterials((prev) =>
+        prev.includes(materialId)
+          ? prev.filter((id) => id !== materialId)
+          : [...prev, materialId]
+      );
+    } catch (err) {
+      Alert.alert("Error", err.message || "Failed to update favorite status.");
+    }
+  };
+
   const renderMaterialCard = ({ item }, isPendingView = false) => {
     const isBusy = actionLoading === item._id;
     return (
@@ -173,6 +198,20 @@ export default function CourseMaterialsScreen() {
           >
             <Feather name="eye" size={16} color={COLORS.blue} />
           </TouchableOpacity>
+
+          {!isPendingView && (
+            <TouchableOpacity
+              style={styles.actionBtn}
+              onPress={() => handleToggleFavorite(item._id)}
+              disabled={isBusy}
+            >
+              <FontAwesome 
+                name={favoriteMaterials.includes(item._id) ? "heart" : "heart-o"} 
+                size={16} 
+                color={favoriteMaterials.includes(item._id) ? COLORS.error : COLORS.blue} 
+              />
+            </TouchableOpacity>
+          )}
 
           {isTeacher && isPendingView && (
             <TouchableOpacity

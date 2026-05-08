@@ -13,7 +13,8 @@ import RNPickerSelect from "react-native-picker-select";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
-import { getCourses, deleteCourse } from "../../src/services/coursesService";
+import { getCourses, deleteCourse, toggleFollowCourse } from "../../src/services/coursesService";
+import { getProfile } from "../../src/services/profileService";
 import { router, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { jwtDecode } from "jwt-decode";
@@ -37,6 +38,7 @@ export default function CoursesScreen() {
   const [department, setDepartment] = useState(null);
   const [year, setYear] = useState(null);
   const [search, setSearch] = useState("");
+  const [following, setFollowing] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,6 +50,12 @@ export default function CoursesScreen() {
           if (token) {
             const decodedToken = jwtDecode(token);
             setIsAdmin(decodedToken.role === "teacher");
+            try {
+              const profileRes = await getProfile(token);
+              setFollowing(profileRes.user?.followedCourses || []);
+            } catch(e) {
+              console.error("Profile fetch error:", e);
+            }
           }
         } catch (err) {
           console.error("Failed to load courses:", err);
@@ -115,6 +123,19 @@ export default function CoursesScreen() {
     );
   };
 
+  const handleToggleFollow = async (courseCode) => {
+    try {
+      await toggleFollowCourse(courseCode);
+      setFollowing((prev) =>
+        prev.includes(courseCode)
+          ? prev.filter((c) => c !== courseCode)
+          : [...prev, courseCode]
+      );
+    } catch (err) {
+      Alert.alert("Error", err.message || "Failed to update follow status.");
+    }
+  };
+
   const renderCourse = ({ item, index }) => (
     <Animated.View entering={FadeInUp.delay(index * 100).duration(500).springify()}>
       <TouchableOpacity
@@ -133,8 +154,17 @@ export default function CoursesScreen() {
               {item.title}
             </Text>
           </View>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{item.courseCode}</Text>
+          <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
+            <TouchableOpacity onPress={() => handleToggleFollow(item.courseCode)} style={{padding: 2}}>
+              <Ionicons 
+                name={following.includes(item.courseCode) ? "star" : "star-outline"} 
+                size={24} 
+                color={following.includes(item.courseCode) ? "#f5a623" : COLORS.authTextMuted} 
+              />
+            </TouchableOpacity>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{item.courseCode}</Text>
+            </View>
           </View>
         </View>
 

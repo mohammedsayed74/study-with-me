@@ -19,7 +19,7 @@ import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import * as ImagePicker from "expo-image-picker";
 import Animated, { FadeInUp, FadeInDown } from "react-native-reanimated";
-import { getProfile } from "../../src/services/profileService";
+import { getProfile, uploadProfilePicture, deleteProfilePicture } from "../../src/services/profileService";
 import { COLORS, RADIUS, SPACING, TYPO } from "../../src/theme/theme";
 
 function GenderModal({ visible, selected, onSelect, onClose }) {
@@ -69,20 +69,31 @@ function GenderModal({ visible, selected, onSelect, onClose }) {
   );
 }
 
-function Avatar({ imageUri, onPress }) {
+function Avatar({ imageUri, onPress, onDelete, uploading }) {
   return (
-    <TouchableOpacity onPress={onPress} style={styles.avatarRing} activeOpacity={0.8}>
-      {imageUri ? (
-        <Image source={{ uri: imageUri }} style={styles.avatarImage} />
-      ) : (
-        <View style={styles.avatarDefault}>
-          <Ionicons name="person" size={45} color={COLORS.authPrimary} />
+    <View style={styles.avatarWrapperContainer}>
+      <TouchableOpacity onPress={onPress} style={styles.avatarRing} activeOpacity={0.8}>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.avatarImage} />
+        ) : (
+          <View style={styles.avatarDefault}>
+            <Ionicons name="person" size={45} color={COLORS.authPrimary} />
+          </View>
+        )}
+        <View style={styles.avatarEditBadge}>
+          {uploading ? (
+            <ActivityIndicator size="small" color={COLORS.white} />
+          ) : (
+            <Ionicons name="camera" size={14} color={COLORS.white} />
+          )}
         </View>
-      )}
-      <View style={styles.avatarEditBadge}>
-        <Ionicons name="camera" size={14} color={COLORS.white} />
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {imageUri ? (
+        <TouchableOpacity style={styles.trashBadge} onPress={onDelete}>
+          <Ionicons name="trash" size={16} color={COLORS.white} />
+        </TouchableOpacity>
+      ) : null}
+    </View>
   );
 }
 
@@ -108,6 +119,7 @@ export default function ProfileScreen() {
   
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [coverPhoto, setCoverPhoto] = useState(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
@@ -132,7 +144,7 @@ export default function ProfileScreen() {
       setNickName((await AsyncStorage.getItem(`profileNickName_${userEmail}`)) || "");
       setGender((await AsyncStorage.getItem(`profileGender_${userEmail}`)) || "");
       setDescription((await AsyncStorage.getItem(`profileDesc_${userEmail}`)) || "");
-      setProfilePhoto((await AsyncStorage.getItem(`profilePhoto_${userEmail}`)) || null);
+      setProfilePhoto(data.user.profilePicture || null);
       setCoverPhoto((await AsyncStorage.getItem(`coverPhoto_${userEmail}`)) || null);
     } catch (err) {
       setError(err.message || "Failed to load profile.");
@@ -151,29 +163,98 @@ export default function ProfileScreen() {
       await AsyncStorage.setItem(`profileNickName_${email}`, nickName);
       await AsyncStorage.setItem(`profileGender_${email}`, gender);
       await AsyncStorage.setItem(`profileDesc_${email}`, description);
-      if (profilePhoto) await AsyncStorage.setItem(`profilePhoto_${email}`, profilePhoto);
       if (coverPhoto) await AsyncStorage.setItem(`coverPhoto_${email}`, coverPhoto);
     }
     setIsEditing((v) => !v);
   };
 
-  const pickImage = async (type) => {
-    if (!isEditing) return;
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: type === 'cover' ? [16, 9] : [1, 1],
-      quality: 0.8,
-    });
-
+  const handleImageResult = async (result, type) => {
     if (!result.canceled) {
       if (type === 'cover') {
         setCoverPhoto(result.assets[0].uri);
       } else {
-        setProfilePhoto(result.assets[0].uri);
+        setUploadingPhoto(true);
+        try {
+          const uri = result.assets[0].uri;
+          const fileName = uri.split('/').pop() || "profile.jpg";
+          const res = await uploadProfilePicture(uri, fileName, "image/jpeg");
+          setProfilePhoto(res.profilePicture);
+        } catch (err) {
+          Alert.alert("Error", err.message || "Failed to upload photo");
+        } finally {
+          setUploadingPhoto(false);
+        }
       }
     }
+  };
+
+  const pickImage = async (type) => {
+    if (type === 'cover' && !isEditing) return;
+
+    Alert.alert(
+      "Update Photo",
+      "Choose an option",
+      [
+        {
+          text: "Take a Photo",
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert("Permission required", "Sorry, we need camera permissions to make this work!");
+              return;
+            }
+            let result = await ImagePicker.launchCameraAsync({
+              allowsEditing: true,
+              aspect: type === 'cover' ? [16, 9] : [1, 1],
+              quality: 0.8,
+            });
+            handleImageResult(result, type);
+          }
+        },
+        {
+          text: "Choose from Gallery",
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert("Permission required", "Sorry, we need camera roll permissions to make this work!");
+              return;
+            }
+            let result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: type === 'cover' ? [16, 9] : [1, 1],
+              quality: 0.8,
+            });
+            handleImageResult(result, type);
+          }
+        },
+        {
+          text: "Cancel",
+          style: "cancel"
+        }
+      ]
+    );
+  };
+
+  const handleDeletePhoto = () => {
+    Alert.alert("Delete Photo", "Are you sure you want to remove your profile picture?", [
+      { text: "Cancel", style: "cancel" },
+      { 
+        text: "Delete", 
+        style: "destructive", 
+        onPress: async () => {
+          setUploadingPhoto(true);
+          try {
+            await deleteProfilePicture();
+            setProfilePhoto(null);
+          } catch(err) {
+            Alert.alert("Error", err.message || "Failed to delete photo");
+          } finally {
+            setUploadingPhoto(false);
+          }
+        }
+      }
+    ]);
   };
 
   const handleLogout = () => {
@@ -238,7 +319,12 @@ export default function ProfileScreen() {
       </TouchableOpacity>
 
       <Animated.View entering={FadeInDown.duration(600).springify()} style={styles.avatarWrapper}>
-        <Avatar imageUri={profilePhoto} onPress={() => pickImage('profile')} />
+        <Avatar 
+          imageUri={profilePhoto} 
+          onPress={() => pickImage('profile')} 
+          onDelete={handleDeletePhoto}
+          uploading={uploadingPhoto}
+        />
       </Animated.View>
 
       <Animated.View entering={FadeInUp.delay(100).duration(600).springify()}>
@@ -421,6 +507,11 @@ const styles = StyleSheet.create({
     marginTop: -(AVATAR_SIZE / 2),
     zIndex: 10,
   },
+  avatarWrapperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative'
+  },
   avatarRing: {
     width: AVATAR_SIZE + 8,
     height: AVATAR_SIZE + 8,
@@ -461,6 +552,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 3,
     borderColor: COLORS.authBg,
+  },
+  trashBadge: {
+    position: 'absolute',
+    bottom: 0,
+    left: -10,
+    backgroundColor: COLORS.error,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: COLORS.authBg,
+    zIndex: 20
   },
 
   nameRow: {

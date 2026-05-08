@@ -62,3 +62,18 @@ export const deleteCourse = async (courseCode) => {
   return data;
 };
 
+export const toggleFollowCourse = async (courseCode) => {
+  const token = await AsyncStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/users/toggle-follow`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ courseCode }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to toggle follow");
+  return data;
+};
+

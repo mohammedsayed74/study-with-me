@@ -27,6 +27,8 @@ import {
   approveMaterial,
   rejectMaterial,
 } from "../../src/services/dashboardService";
+import { getProfile } from "../../src/services/profileService";
+import { Image } from "react-native";
 
 const AVATAR_COLORS = [
   "#2b8cee", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444",
@@ -42,6 +44,7 @@ const REASONS = [
 
 export default function DashboardScreen() {
   const [user, setUser] = useState(null);
+  const [profilePic, setProfilePic] = useState(null);
   const [token, setToken] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -75,6 +78,13 @@ export default function DashboardScreen() {
         const decoded = jwtDecode(storedToken);
         setUser(decoded);
         fetchData(decoded, storedToken);
+        
+        try {
+          const profileData = await getProfile(storedToken);
+          setProfilePic(profileData?.user?.profilePicture || null);
+        } catch (e) {
+          console.log("Error fetching profile pic for dashboard", e);
+        }
       } catch (err) {
         const name = await AsyncStorage.getItem("user_name");
         const role = await AsyncStorage.getItem("user_role");
@@ -128,6 +138,10 @@ export default function DashboardScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchData(user, token);
+    try {
+      const profileData = await getProfile(token);
+      setProfilePic(profileData?.user?.profilePicture || null);
+    } catch(e) {}
     setRefreshing(false);
   };
 
@@ -159,7 +173,7 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.white} />}
       >
-        <DashHeader user={user} onLogout={handleLogout} />
+        <DashHeader user={user} profilePic={profilePic} onLogout={handleLogout} />
 
         {isTeacher ? (
           <TeacherDashboard
@@ -194,7 +208,7 @@ export default function DashboardScreen() {
 }
 
 
-function DashHeader({ user, onLogout }) {
+function DashHeader({ user, profilePic, onLogout }) {
   const isTeacher = user.role === "teacher" || user.role === "doctor";
   return (
     <Animated.View entering={FadeInUp.duration(600).springify()} style={{ marginBottom: SPACING.xl, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 40 }}>
@@ -207,12 +221,16 @@ function DashHeader({ user, onLogout }) {
       <View style={{ alignItems: "center", marginLeft: SPACING.md }}>
         <View style={{
           width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.white,
-          justifyContent: "center", alignItems: "center",
+          justifyContent: "center", alignItems: "center", overflow: 'hidden',
           marginBottom: 4, shadowColor: COLORS.navy, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 5
         }}>
-          <Text style={{ fontSize: 20, fontFamily: "PlusJakartaSans_800ExtraBold", color: COLORS.authPrimary }}>
-            {user.name?.charAt(0).toUpperCase() || "?"}
-          </Text>
+          {profilePic ? (
+            <Image source={{ uri: profilePic }} style={{ width: 48, height: 48, borderRadius: 24 }} />
+          ) : (
+            <Text style={{ fontSize: 20, fontFamily: "PlusJakartaSans_800ExtraBold", color: COLORS.authPrimary }}>
+              {user.name?.charAt(0).toUpperCase() || "?"}
+            </Text>
+          )}
         </View>
         <Text style={{ fontSize: 10, fontFamily: "PlusJakartaSans_700Bold", color: "rgba(255, 255, 255, 0.8)", textTransform: "uppercase" }}>
           {user.role}

@@ -104,3 +104,28 @@ export const deleteMaterial = async (materialId) => {
   if (!res.ok) throw new Error(data.message || "Failed to delete material");
   return data;
 };
+
+export const toggleFavoriteMaterial = async (materialId) => {
+  const token = await AsyncStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/users/toggle-favorite-material`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ materialId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to toggle favorite");
+  return data;
+};
+
+export const getFavoriteMaterials = async () => {
+  const token = await AsyncStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/users/favorite-materials`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to fetch favorite materials");
+  return data.data || [];
+};
