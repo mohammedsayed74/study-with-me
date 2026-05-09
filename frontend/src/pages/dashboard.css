@@ -1071,6 +1071,7 @@ body:has(.dashboard-layout) #root {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+  align-items: start;
 }
 
 .dash-grid-2 .dash-card {

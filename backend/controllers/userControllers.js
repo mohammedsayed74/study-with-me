@@ -134,8 +134,7 @@ const resetPassword = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.hashedPassword = hashedPassword;
-    await user.save();
+    await User.findByIdAndUpdate(req.user._id, { hashedPassword });
 
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
@@ -158,17 +157,24 @@ const toggleFollowCourse = async (req, res) => {
 
     const isFollowing = user.followedCourses.includes(courseCode);
     
+    let updatedUser;
     if (isFollowing) {
-      user.followedCourses = user.followedCourses.filter(code => code !== courseCode);
+      updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $pull: { followedCourses: courseCode } },
+        { new: true }
+      );
     } else {
-      user.followedCourses.push(courseCode);
+      updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $addToSet: { followedCourses: courseCode } },
+        { new: true }
+      );
     }
-
-    await user.save();
 
     res.status(200).json({ 
       message: isFollowing ? 'Course unfollowed' : 'Course followed',
-      followedCourses: user.followedCourses 
+      followedCourses: updatedUser.followedCourses 
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -188,19 +194,26 @@ const toggleFavoriteMaterial = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const isFavorited = user.favoriteMaterials.includes(materialId);
+    const isFavorited = user.favoriteMaterials.some(id => id.toString() === materialId.toString());
     
+    let updatedUser;
     if (isFavorited) {
-      user.favoriteMaterials = user.favoriteMaterials.filter(id => id.toString() !== materialId.toString());
+      updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $pull: { favoriteMaterials: materialId } },
+        { new: true }
+      );
     } else {
-      user.favoriteMaterials.push(materialId);
+      updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { $addToSet: { favoriteMaterials: materialId } },
+        { new: true }
+      );
     }
-
-    await user.save();
 
     res.status(200).json({ 
       message: isFavorited ? 'Material removed from favorites' : 'Material added to favorites',
-      favoriteMaterials: user.favoriteMaterials 
+      favoriteMaterials: updatedUser.favoriteMaterials 
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -247,14 +260,17 @@ const uploadProfilePicture = async (req, res) => {
       }
     }
 
-    user.profilePicture = req.file.secure_url || req.file.path;
-    user.profilePicturePublicId = req.file.filename || req.file.public_id;
+    const profilePicture = req.file.secure_url || req.file.path;
+    const profilePicturePublicId = req.file.filename || req.file.public_id;
     
-    await user.save();
+    await User.findByIdAndUpdate(req.user._id, {
+      profilePicture,
+      profilePicturePublicId
+    });
 
     res.status(200).json({
       message: "Profile picture updated successfully",
-      profilePicture: user.profilePicture
+      profilePicture: profilePicture
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -276,10 +292,10 @@ const deleteProfilePicture = async (req, res) => {
       }
     }
 
-    user.profilePicture = "";
-    user.profilePicturePublicId = "";
-    
-    await user.save();
+    await User.findByIdAndUpdate(req.user._id, {
+      profilePicture: "",
+      profilePicturePublicId: ""
+    });
 
     res.status(200).json({ message: "Profile picture removed successfully" });
   } catch (error) {

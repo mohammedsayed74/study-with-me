@@ -41,15 +41,15 @@ const getPosts = async (req, res) => {
 const createPost = async (req, res) => {
   try {
     const { content } = req.body;
-    if (!content || content.trim() === "") {
-      return res.status(400).json({ message: "Content is required" });
+    if ((!content || content.trim() === "") && !req.file) {
+      return res.status(400).json({ message: "Content or an image is required" });
     }
 
     const post = await CommunityPost.create({
-      content,
+      content: content || "",
       author: req.user._id,
-      imageUrl: req.file ? req.file.path : null,
-      imagePublicId: req.file ? req.file.filename : null
+      imageUrl: req.file ? (req.file.secure_url || req.file.path) : null,
+      imagePublicId: req.file ? (req.file.public_id || req.file.filename) : null
     });
 
     const populatedPost = await CommunityPost.findById(post._id).populate("author", "name role").lean();

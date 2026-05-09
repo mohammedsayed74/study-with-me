@@ -174,7 +174,7 @@ function StudentDashboard({ token }) {
       <DashboardCard
         icon="rate_review"
         title="My Latest Ratings"
-        count={ratings.length}
+        count={ratings.slice(0, 3).length}
         loading={loadingRatings}
       >
         {ratings.length === 0 ? (
@@ -197,7 +197,7 @@ function StudentDashboard({ token }) {
                 </tr>
               </thead>
               <tbody>
-                {ratings.map((r) => (
+                {ratings.slice(0, 3).map((r) => (
                   <tr key={r._id}>
                     <td className="dash-table-title">{r.title}</td>
                     <td>{r.courseCode}</td>
@@ -273,7 +273,7 @@ function StudentDashboard({ token }) {
         <DashboardCard
           icon="workspace_premium"
           title="Highest Rated Files"
-          count={topRated.length}
+          count={topRated.slice(0, 3).length}
           loading={loadingTop}
         >
           {topRated.length === 0 ? (
@@ -296,7 +296,7 @@ function StudentDashboard({ token }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {topRated.map((m) => (
+                  {topRated.slice(0, 3).map((m) => (
                     <tr key={m._id}>
                       <td>
                         <div className="dash-table-title">{m.title}</div>
@@ -319,7 +319,7 @@ function StudentDashboard({ token }) {
         <DashboardCard
           icon="emoji_events"
           title="Most Active Contributors"
-          count={contributors.length}
+          count={contributors.slice(0, 3).length}
           loading={loadingContrib}
         >
           {contributors.length === 0 ? (
@@ -342,7 +342,7 @@ function StudentDashboard({ token }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {contributors.map((c, i) => (
+                  {contributors.slice(0, 3).map((c, i) => (
                     <tr key={c._id}>
                       <td>
                         <span className={`contributor-rank ${getRankClass(i)}`}>

@@ -7,6 +7,7 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse, showO
   const [courses, setCourses] = useState([]);
   const [searchDepartment, setSearchDepartment] = useState("");
   const [searchYear, setSearchYear] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // 🟢 FOLLOW FEATURE ADDED
   const [following, setFollowing] = useState([]);
@@ -32,6 +33,15 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse, showO
     if (searchYear) match = match && course.year === Number(searchYear);
     return match;
   });
+
+  const itemsPerPage = 10;
+  const totalPages = Math.max(1, Math.ceil(filteredCourses.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCourses = filteredCourses.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchDepartment, searchYear, showOnlyFollowing]);
 
   useEffect(() => {
     getCourses();
@@ -130,7 +140,7 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse, showO
       {/* COURSES GRID */}
       <div className="courses-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
         
-        {filteredCourses.map((course) => (
+        {paginatedCourses.map((course) => (
           <div
             key={course.courseCode}
             className="course-card"
@@ -220,6 +230,29 @@ function CoursesList({ userRole, onCourseClick, onEditCourse, onAddCourse, showO
             )}
           </div>
         ))}
+      </div>
+
+      {/* PAGINATION CONTROLS */}
+      <div className="pagination" style={{ marginTop: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
+        <button
+          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          disabled={currentPage === 1}
+          className="dash-btn dash-btn-view"
+          style={{ padding: '8px 20px', borderRadius: '10px' }}
+        >
+          Previous
+        </button>
+        <span className="pagination-info" style={{ fontWeight: 600, color: 'var(--dash-text-secondary)' }}>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          disabled={currentPage >= totalPages}
+          className="dash-btn dash-btn-view"
+          style={{ padding: '8px 20px', borderRadius: '10px' }}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
